@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Permohonan Stok MUK - Sistem Logistik LSP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        },
+                        whatsapp: {
+                            500: '#25D366',
+                            600: '#128C7E',
+                            700: '#075E54',
+                            bg: '#EFEAE2',
+                            bubble: '#D9FDD3'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Notifikasi Toast (Pengganti alert()) -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-md shadow-primary-500/20">
+                    <i class="fa-solid fa-clipboard-check text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 text-sm sm:text-lg leading-tight">Form Permohonan Stok MUK</h1>
+                    <p class="text-[11px] sm:text-xs text-slate-500">Materi Uji Kompetensi &bull; Khusus Asesor Kompetensi</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="resetForm()" class="text-xs sm:text-sm text-slate-600 hover:text-red-600 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Reset Form</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            
+            <!-- Kolom Kiri: Form Input (7 Kolom di Desktop) -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Card 1: Konfigurasi Nomor WhatsApp Tujuan -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                                <i class="fa-brands fa-whatsapp text-lg"></i>
+                            </span>
+                            <div>
+                                <h2 class="font-semibold text-slate-900 text-sm sm:text-base">Tujuan Admin / Logistik MUK LSP</h2>
+                                <p class="text-xs text-slate-500">Nomor resmi Admin LSP terkunci otomatis</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="wa-saved-badge" class="text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
+                                <i class="fa-solid fa-lock mr-1"></i>Terkunci
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <span class="text-slate-400 font-medium text-sm">+</span>
+                            </div>
+                            <input type="tel" id="wa-destination" value="6281388326646" disabled readonly
+                                class="w-full pl-7 pr-4 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 cursor-not-allowed select-none outline-none">
+                        </div>
+                    </div>
+                    <p id="error-wa" class="hidden text-xs text-red-600 mt-1.5 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>Nomor WhatsApp tujuan wajib diisi dengan format 628xxx.</p>
+                </section>
+
+                <!-- Card 2: Informasi Asesor / Pemohon -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+                    <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-slate-100">
+                        <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">1</span>
+                        <div>
+                            <h2 class="font-semibold text-slate-900 text-base">Data Asesor / Pemohon</h2>
+                            <p class="text-xs text-slate-500">Isi nama asesor pemohon permohonan stok MUK & dokumen</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                        <!-- Nama Asesor / Pemohon -->
+                        <div>
+                            <label for="nama-pemohon" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Nama Asesor / Pemohon <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="nama-pemohon" placeholder="Contoh: Siti Aminah, S.Pd" 
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all outline-none"
+                                oninput="updatePreview()">
+                            <p id="error-nama" class="hidden text-xs text-red-600 mt-1">Nama asesor / pemohon wajib diisi.</p>
+                        </div>
+
+                        <!-- Nomor HP / WA Pemohon (Opsional) -->
+                        <div>
+                            <label for="hp-pemohon" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                No. HP / WA Pemohon <span class="text-slate-400 font-normal normal-case">(Opsional)</span>
+                            </label>
+                            <input type="tel" id="hp-pemohon" placeholder="Contoh: 081234567890" 
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all outline-none"
+                                oninput="updatePreview()">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Card 3: Daftar Permohonan Stok MUK & Dokumen -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">2</span>
+                            <div>
+                                <h2 class="font-semibold text-slate-900 text-base">Daftar Permohonan Stok MUK <span class="text-red-500">*</span></h2>
+                                <p class="text-xs text-slate-500">Tentukan jumlah eksemplar/paket untuk setiap item yang dibutuhkan</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="resetQuantities()" class="text-xs font-medium text-slate-600 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
+                            <i class="fa-solid fa-eraser mr-1"></i>Nol-kan Jumlah
+                        </button>
+                    </div>
+
+                    <!-- Container Daftar Item MUK & Dokumen -->
+                    <div id="muk-items-container" class="space-y-3">
+                        <!-- Baris item akan di-render melalui JavaScript -->
+                    </div>
+
+                    <p id="error-muk" class="hidden text-xs text-red-600 mt-3 font-medium">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i>Pilih minimal 1 item MUK/dokumen dengan jumlah lebih dari 0.
+                    </p>
+
+                    <!-- Ringkasan Total -->
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 font-medium">
+                        <span>Item Dipilih: <strong id="total-jenis" class="text-slate-900">0</strong> Jenis</span>
+                        <span>Total Permohonan: <strong id="total-eksemplar" class="text-primary-600">0</strong> Eksemplar</span>
+                    </div>
+                </section>
+
+                <!-- Card 4: Catatan Tambahan -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+                    <div class="flex items-center gap-2.5 mb-3">
+                        <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">3</span>
+                        <div>
+                            <h2 class="font-semibold text-slate-900 text-base">Catatan Tambahan <span class="text-slate-400 font-normal text-xs">(Opsional)</span></h2>
+                            <p class="text-xs text-slate-500">Keterangan pengiriman, batas waktu pengambilan, atau kebutuhan khusus</p>
+                        </div>
+                    </div>
+                    <textarea id="catatan-tambahan" rows="3" placeholder="Contoh: Mohon disiapkan sebelum hari Sabtu pagi. Terima kasih." 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all outline-none resize-y"
+                        oninput="updatePreview()"></textarea>
+                </section>
+
+            </div>
+
+            <!-- Kolom Kanan: Live Preview & Tombol Kirim (5 Kolom di Desktop, Sticky) -->
+            <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-5">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
+                    <!-- Header Preview -->
+                    <div class="bg-whatsapp-700 text-white px-5 py-3.5 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                                <i class="fa-brands fa-whatsapp text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-sm leading-tight">Pratinjau Pesan WhatsApp</h3>
+                                <p class="text-[11px] text-emerald-100" id="preview-recipient-label">Tujuan: Belum diatur</p>
+                            </div>
+                        </div>
+                        <span class="text-[11px] bg-black/20 px-2.5 py-1 rounded-full font-medium">Live Preview</span>
+                    </div>
+
+                    <!-- Area Simulasi Chat WhatsApp -->
+                    <div class="bg-whatsapp-bg p-4 sm:p-5 min-h-[290px] max-h-[460px] overflow-y-auto relative">
+                        <!-- Bubble Chat -->
+                        <div class="bg-whatsapp-bubble text-slate-800 rounded-2xl rounded-tl-none p-4 shadow-sm border border-emerald-200/60 relative">
+                            <pre id="message-preview" class="font-sans text-xs sm:text-[13px] whitespace-pre-wrap break-words leading-relaxed text-slate-800"></pre>
+                            <div class="flex items-center justify-end gap-1 mt-2 text-[10px] text-slate-500">
+                                <span id="preview-time">12:00</span>
+                                <i class="fa-solid fa-check-double text-sky-500"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="p-4 sm:p-5 bg-white border-t border-slate-200 space-y-3">
+                        <button type="button" onclick="sendToWhatsApp()" 
+                            class="w-full py-3.5 px-5 bg-whatsapp-500 hover:bg-whatsapp-600 active:scale-[0.99] text-white font-semibold text-sm sm:text-base rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2.5">
+                            <i class="fa-brands fa-whatsapp text-xl"></i>
+                            <span>Kirim Permohonan ke WhatsApp</span>
+                        </button>
+
+                        <button type="button" onclick="copyMessageText()" 
+                            class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm rounded-xl transition-colors flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>Salin Teks Pesan</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Box Singkat -->
+                <div class="bg-emerald-50/80 border border-emerald-100 rounded-xl p-4 flex items-start gap-3">
+                    <i class="fa-solid fa-circle-info text-primary-600 mt-0.5"></i>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        <strong>Panduan Asesor:</strong> Atur jumlah set MUK pada skema yang akan diujikan, lalu tekan tombol <strong>Kirim Permohonan ke WhatsApp</strong> untuk meneruskan pesanan otomatis ke bagian logistik LSP.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-5 mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
+            &copy; <span id="year-now"></span> Form Permohonan Stok Materi Uji Kompetensi (MUK) &bull; Asesor Kompetensi LSP
+        </div>
+    </footer>
+
+    <!-- Hidden textarea untuk fallback copy clipboard -->
+    <textarea id="clipboard-helper" class="sr-only" aria-hidden="true"></textarea>
+
+    <script>
+        // Nomor WhatsApp resmi Admin / Logistik MUK LSP yang dikunci permanen
+        const LOCKED_ADMIN_WA = '6281388326646';
+
+        // Daftar tetap 8 item MUK & Dokumen sesuai kebutuhan Asesor Kompetensi
+        const DEFAULT_MUK_LIST = [
+            { id: 'housekeeper', name: 'Skema Housekeeper', qty: 0 },
+            { id: 'caretaker', name: 'Skema Caretaker', qty: 0 },
+            { id: 'babysitter', name: 'Skema Babysitter', qty: 0 },
+            { id: 'sprint-housekeeper', name: 'Sprint Housekeeper', qty: 0 },
+            { id: 'sprint-caretaker', name: 'Sprint Caretaker', qty: 0 },
+            { id: 'sprint-baby', name: 'Sprint Baby', qty: 0 },
+            { id: 'verifikasi-tuk', name: 'Verifikasi TUK', qty: 0 },
+            { id: 'tanda-terima-sertifikat', name: 'Form Tanda Terima Sertifikat', qty: 0 }
+        ];
+
+        // State daftar item MUK
+        let mukItems = DEFAULT_MUK_LIST.map(item => ({ ...item }));
+
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('year-now').textContent = new Date().getFullYear();
+
+            // Set nomor WhatsApp Admin resmi yang terkunci
+            document.getElementById('wa-destination').value = LOCKED_ADMIN_WA;
+
+            // Render daftar item MUK
+            renderMukRows();
+
+            // Update jam di pratinjau
+            updatePreviewClock();
+            setInterval(updatePreviewClock, 30000);
+
+            // Render pratinjau pertama kali
+            updatePreview();
+        });
+
+        // Menampilkan notifikasi toast (tanpa alert)
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-slate-900 text-white border-slate-700',
+                error: 'bg-red-600 text-white border-red-700',
+                info: 'bg-primary-700 text-white border-primary-800'
+            };
+
+            const icons = {
+                success: 'fa-circle-check text-emerald-400',
+                error: 'fa-circle-exclamation text-white',
+                info: 'fa-circle-info text-emerald-200'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.success}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icons[type] || icons.success}"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // Render ulang semua baris item MUK dengan tombol +/- dan input angka langsung
+        function renderMukRows() {
+            const container = document.getElementById('muk-items-container');
+            container.innerHTML = '';
+
+            mukItems.forEach((item, index) => {
+                const isSelected = item.qty > 0;
+                const row = document.createElement('div');
+                row.id = `row-${item.id}`;
+                row.className = `flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border transition-all ${
+                    isSelected 
+                        ? 'bg-primary-50/50 border-primary-300 shadow-xs' 
+                        : 'bg-slate-50/70 border-slate-200 hover:border-slate-300'
+                }`;
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center shrink-0 ${
+                            isSelected ? 'bg-primary-600 text-white' : 'bg-slate-200 text-slate-600'
+                        }">${index + 1}</span>
+                        <span class="font-medium text-sm ${isSelected ? 'text-primary-900 font-semibold' : 'text-slate-800'}">
+                            ${escapeHtml(item.name)}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 shrink-0">
+                        <button type="button" onclick="adjustMukQty('${item.id}', -1)" aria-label="Kurangi ${escapeHtml(item.name)}"
+                            class="w-10 h-10 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 active:scale-95 text-slate-700 font-bold flex items-center justify-center transition-all shadow-2xs">
+                            <i class="fa-solid fa-minus text-xs"></i>
+                        </button>
+                        <input type="number" id="qty-input-${item.id}" min="0" max="9999" value="${item.qty}" 
+                            aria-label="Jumlah ${escapeHtml(item.name)}"
+                            class="w-16 h-10 text-center bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                            oninput="setMukQty('${item.id}', this.value)">
+                        <button type="button" onclick="adjustMukQty('${item.id}', 1)" aria-label="Tambah ${escapeHtml(item.name)}"
+                            class="w-10 h-10 rounded-xl bg-primary-600 hover:bg-primary-700 active:scale-95 text-white font-bold flex items-center justify-center transition-all shadow-2xs">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            updateSummaryCounts();
+            updatePreview();
+        }
+
+        // Tambah atau kurangi jumlah item MUK lewat tombol +/-
+        function adjustMukQty(id, delta) {
+            const target = mukItems.find(item => item.id === id);
+            if (!target) return;
+
+            target.qty = Math.max(0, (target.qty || 0) + delta);
+            renderMukRows();
+        }
+
+        // Atur jumlah item MUK dari input angka langsung tanpa menghilangkan fokus ketik
+        function setMukQty(id, value) {
+            const target = mukItems.find(item => item.id === id);
+            if (!target) return;
+
+            const parsed = parseInt(value, 10);
+            target.qty = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+
+            const row = document.getElementById(`row-${id}`);
+            if (row) {
+                const isSelected = target.qty > 0;
+                row.className = `flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border transition-all ${
+                    isSelected 
+                        ? 'bg-primary-50/50 border-primary-300 shadow-xs' 
+                        : 'bg-slate-50/70 border-slate-200 hover:border-slate-300'
+                }`;
+            }
+
+            updateSummaryCounts();
+            updatePreview();
+        }
+
+        // Reset semua jumlah item menjadi 0
+        function resetQuantities() {
+            mukItems.forEach(item => { item.qty = 0; });
+            renderMukRows();
+            showToast('Semua jumlah item telah di-nolkan.', 'info');
+        }
+
+        // Hitung total jenis dokumen & total eksemplar
+        function updateSummaryCounts() {
+            const selectedItems = mukItems.filter(i => i.qty > 0);
+            const totalQty = selectedItems.reduce((sum, item) => sum + item.qty, 0);
+
+            document.getElementById('total-jenis').textContent = selectedItems.length;
+            document.getElementById('total-eksemplar').textContent = totalQty;
+        }
+
+        // Susun teks pesan WhatsApp terformat rapi (tanpa Tanggal UJK & Nama TUK)
+        function buildWhatsAppMessage() {
+            const nama = document.getElementById('nama-pemohon').value.trim() || '[Nama Asesor / Pemohon]';
+            const hp = document.getElementById('hp-pemohon').value.trim();
+            const catatan = document.getElementById('catatan-tambahan').value.trim();
+
+            const selectedItems = mukItems.filter(i => i.qty > 0);
+            let daftarMukText = '';
+            let totalEks = 0;
+
+            if (selectedItems.length === 0) {
+                daftarMukText = '   _(Belum ada item MUK / dokumen yang dipilih)_';
+            } else {
+                selectedItems.forEach((item, idx) => {
+                    daftarMukText += `${idx + 1}. ${item.name} — *${item.qty} eks*\n`;
+                    totalEks += item.qty;
+                });
+                daftarMukText = daftarMukText.trimEnd();
+            }
+
+            let msg = `*PERMOHONAN STOK MUK & DOKUMEN LSP*\n`;
+            msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+            msg += `Yth. Admin / Bagian Logistik LSP,\n`;
+            msg += `Berikut permohonan penyiapan stok MUK & dokumen uji kompetensi:\n\n`;
+            msg += `*DATA PEMOHON*\n`;
+            msg += `• *Nama Asesor / Pemohon:* ${nama}\n`;
+            if (hp) {
+                msg += `• *No. HP / WA:* ${hp}\n`;
+            }
+            msg += `\n*DAFTAR PERMOHONAN STOK MUK*\n`;
+            msg += `${daftarMukText}\n`;
+            msg += `• *Total:* ${selectedItems.length} jenis (${totalEks} eksemplar)\n`;
+
+            if (catatan) {
+                msg += `\n*CATATAN TAMBAHAN*\n`;
+                msg += `_${catatan}_\n`;
+            }
+
+            msg += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
+            msg += `Mohon konfirmasi ketersediaannya. Terima kasih.`;
+
+            return msg;
+        }
+
+        // Perbarui tampilan Live Preview
+        function updatePreview() {
+            const label = document.getElementById('preview-recipient-label');
+            label.textContent = `Tujuan: +62 813-8832-6646`;
+
+            const message = buildWhatsAppMessage();
+            document.getElementById('message-preview').textContent = message;
+        }
+
+        // Jam real-time pada bubble chat
+        function updatePreviewClock() {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('preview-time').textContent = `${hh}:${mm}`;
+        }
+
+        // Validasi form sebelum dikirim
+        function validateForm() {
+            let isValid = true;
+            let firstErrorEl = null;
+
+            const namaVal = document.getElementById('nama-pemohon').value.trim();
+            const selectedItems = mukItems.filter(i => i.qty > 0);
+
+            // Reset pesan error
+            ['error-wa', 'error-nama', 'error-muk'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+
+            if (!namaVal) {
+                document.getElementById('error-nama').classList.remove('hidden');
+                isValid = false;
+                firstErrorEl = firstErrorEl || document.getElementById('nama-pemohon');
+            }
+
+            if (selectedItems.length === 0) {
+                document.getElementById('error-muk').classList.remove('hidden');
+                isValid = false;
+                firstErrorEl = firstErrorEl || document.getElementById('muk-items-container');
+            }
+
+            if (!isValid && firstErrorEl) {
+                firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (firstErrorEl.tagName === 'INPUT') firstErrorEl.focus();
+                showToast('Mohon lengkapi data wajib dan pilih minimal 1 item.', 'error');
+            }
+
+            return isValid;
+        }
+
+        // Kirim pesan ke WhatsApp
+        function sendToWhatsApp() {
+            if (!validateForm()) return;
+
+            const message = buildWhatsAppMessage();
+            const encodedMessage = encodeURIComponent(message);
+            const waUrl = `https://wa.me/${LOCKED_ADMIN_WA}?text=${encodedMessage}`;
+
+            showToast('Membuka WhatsApp Admin LSP...', 'success');
+            window.open(waUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        // Salin teks pesan ke clipboard (menggunakan document.execCommand('copy') sesuai aturan lingkungan iframe)
+        function copyMessageText() {
+            const message = buildWhatsAppMessage();
+            const helper = document.getElementById('clipboard-helper');
+            helper.value = message;
+            helper.classList.remove('sr-only');
+            helper.select();
+            helper.setSelectionRange(0, 99999);
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('Teks permohonan berhasil disalin ke clipboard!', 'success');
+                } else {
+                    showToast('Gagal menyalin teks. Silakan salin manual dari kotak pratinjau.', 'error');
+                }
+            } catch (err) {
+                showToast('Browser tidak mendukung penyalinan otomatis.', 'error');
+            }
+
+            helper.classList.add('sr-only');
+            window.getSelection().removeAllRanges();
+        }
+
+        // Reset formulir (tanpa menghapus nomor WA tujuan yang tersimpan)
+        function resetForm() {
+            document.getElementById('nama-pemohon').value = '';
+            document.getElementById('hp-pemohon').value = '';
+            document.getElementById('catatan-tambahan').value = '';
+
+            mukItems = DEFAULT_MUK_LIST.map(item => ({ ...item }));
+
+            ['error-wa', 'error-nama', 'error-muk'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+
+            renderMukRows();
+            showToast('Formulir telah dikosongkan.', 'info');
+        }
+
+        // Helper keamanan HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
