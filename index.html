@@ -122,7 +122,7 @@
                             <label for="nama-pemohon" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                                 Nama Asesor / Pemohon <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" id="nama-pemohon" placeholder="Contoh: Siti Aminah, S.Pd" 
+                            <input type="text" id="nama-pemohon" placeholder="Contoh: Khaeron, SH." 
                                 class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all outline-none"
                                 oninput="updatePreview()">
                             <p id="error-nama" class="hidden text-xs text-red-600 mt-1">Nama asesor / pemohon wajib diisi.</p>
@@ -171,10 +171,67 @@
                     </div>
                 </section>
 
-                <!-- Card 4: Catatan Tambahan -->
+                <!-- Card 4: Metode Pengambilan / Pengiriman -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+                    <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
+                        <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">3</span>
+                        <div>
+                            <h2 class="font-semibold text-slate-900 text-base">Metode Pengambilan / Pengiriman <span class="text-red-500">*</span></h2>
+                            <p class="text-xs text-slate-500">Pilih apakah dokumen diambil ke LSP atau dikirim ke alamat</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="metode-pengambilan" value="Diambil di Kantor LSP" checked onchange="toggleAlamatPengiriman()" class="peer sr-only">
+                            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:border-primary-500 peer-checked:bg-primary-50/60 transition-all flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary-600 shrink-0 shadow-2xs">
+                                    <i class="fa-solid fa-building-user"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-900">Diambil di LSP</div>
+                                    <div class="text-xs text-slate-500">Ambil langsung di kantor LSP</div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="cursor-pointer">
+                            <input type="radio" name="metode-pengambilan" value="Mohon Kirim ke Alamat" onchange="toggleAlamatPengiriman()" class="peer sr-only">
+                            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:border-primary-500 peer-checked:bg-primary-50/60 transition-all flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary-600 shrink-0 shadow-2xs">
+                                    <i class="fa-solid fa-truck-fast"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-900">Mohon Kirim ke Alamat</div>
+                                    <div class="text-xs text-slate-500">Dikirim via kurir / ekspedisi</div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Kolom Alamat (Muncul saat opsi Kirim ke Alamat dipilih) -->
+                    <div id="alamat-pengiriman-wrapper" class="hidden mt-4 pt-4 border-t border-slate-100">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                            <label for="alamat-pengiriman" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                                Detail Penerima & Alamat Lengkap Pengiriman <span class="text-red-500">*</span>
+                            </label>
+                            <button type="button" onclick="fillExampleAddress()" class="text-[11px] font-medium text-primary-700 hover:text-primary-800 bg-primary-50 hover:bg-primary-100 border border-primary-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Isi Contoh (Bpk. Khaeron SH.)</span>
+                            </button>
+                        </div>
+                        <textarea id="alamat-pengiriman" rows="4" placeholder="PENERIMA : Bapak. KHAERON SH.&#10;Alamat   : Perumahan cempaka wangi regency, Blok A No. 21, Jln. Sultan Agung Tirtayasa Cempaka, Kec. Talun, Kab. Cirebon, Jawa Barat.&#10;Tlp/Hp   : 0888 0873 6052"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all outline-none resize-y leading-relaxed"
+                            oninput="updatePreview()"></textarea>
+                        <p class="text-[11px] text-slate-500 mt-1">Cantumkan Nama Penerima, Alamat Lengkap, dan Nomor Telp/HP aktif yang bisa dihubungi kurir.</p>
+                        <p id="error-alamat" class="hidden text-xs text-red-600 mt-1">Detail penerima dan alamat lengkap pengiriman wajib diisi jika memilih opsi dikirim.</p>
+                    </div>
+                </section>
+
+                <!-- Card 5: Catatan Tambahan -->
                 <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
                     <div class="flex items-center gap-2.5 mb-3">
-                        <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">3</span>
+                        <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">4</span>
                         <div>
                             <h2 class="font-semibold text-slate-900 text-base">Catatan Tambahan <span class="text-slate-400 font-normal text-xs">(Opsional)</span></h2>
                             <p class="text-xs text-slate-500">Keterangan pengiriman, batas waktu pengambilan, atau kebutuhan khusus</p>
@@ -419,10 +476,40 @@
             document.getElementById('total-eksemplar').textContent = totalQty;
         }
 
+        // Tampilkan atau sembunyikan kolom alamat pengiriman sesuai opsi radio
+        function toggleAlamatPengiriman() {
+            const selectedMetode = document.querySelector('input[name="metode-pengambilan"]:checked')?.value;
+            const wrapper = document.getElementById('alamat-pengiriman-wrapper');
+            const errorAlamat = document.getElementById('error-alamat');
+
+            if (selectedMetode === 'Mohon Kirim ke Alamat') {
+                wrapper.classList.remove('hidden');
+            } else {
+                wrapper.classList.add('hidden');
+                errorAlamat.classList.add('hidden');
+            }
+            updatePreview();
+        }
+
+        // Isi contoh format penerima & alamat pengiriman (Bapak Khaeron SH.)
+        function fillExampleAddress() {
+            const exampleText = 
+`PENERIMA : Bapak. KHAERON SH.
+Alamat   : Perumahan cempaka wangi regency, Blok A No. 21, Jln. Sultan Agung Tirtayasa Cempaka, Kec. Talun, Kab. Cirebon, Jawa Barat.
+Tlp/Hp   : 0888 0873 6052`;
+
+            document.getElementById('alamat-pengiriman').value = exampleText;
+            document.getElementById('error-alamat').classList.add('hidden');
+            updatePreview();
+            showToast('Contoh format penerima & alamat berhasil dimasukkan.', 'info');
+        }
+
         // Susun teks pesan WhatsApp terformat rapi (tanpa Tanggal UJK & Nama TUK)
         function buildWhatsAppMessage() {
             const nama = document.getElementById('nama-pemohon').value.trim() || '[Nama Asesor / Pemohon]';
             const hp = document.getElementById('hp-pemohon').value.trim();
+            const metode = document.querySelector('input[name="metode-pengambilan"]:checked')?.value || 'Diambil di Kantor LSP';
+            const alamat = document.getElementById('alamat-pengiriman').value.trim();
             const catatan = document.getElementById('catatan-tambahan').value.trim();
 
             const selectedItems = mukItems.filter(i => i.qty > 0);
@@ -451,6 +538,12 @@
             msg += `\n*DAFTAR PERMOHONAN STOK MUK*\n`;
             msg += `${daftarMukText}\n`;
             msg += `• *Total:* ${selectedItems.length} jenis (${totalEks} eksemplar)\n`;
+
+            msg += `\n*PENGAMBILAN / PENGIRIMAN*\n`;
+            msg += `• *Metode:* ${metode}\n`;
+            if (metode === 'Mohon Kirim ke Alamat') {
+                msg += `${alamat ? alamat : '_[Detail Penerima & Alamat belum diisi]_'}\n`;
+            }
 
             if (catatan) {
                 msg += `\n*CATATAN TAMBAHAN*\n`;
@@ -486,10 +579,12 @@
             let firstErrorEl = null;
 
             const namaVal = document.getElementById('nama-pemohon').value.trim();
+            const metodeVal = document.querySelector('input[name="metode-pengambilan"]:checked')?.value;
+            const alamatVal = document.getElementById('alamat-pengiriman').value.trim();
             const selectedItems = mukItems.filter(i => i.qty > 0);
 
             // Reset pesan error
-            ['error-wa', 'error-nama', 'error-muk'].forEach(id => {
+            ['error-wa', 'error-nama', 'error-muk', 'error-alamat'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
 
@@ -505,10 +600,16 @@
                 firstErrorEl = firstErrorEl || document.getElementById('muk-items-container');
             }
 
+            if (metodeVal === 'Mohon Kirim ke Alamat' && !alamatVal) {
+                document.getElementById('error-alamat').classList.remove('hidden');
+                isValid = false;
+                firstErrorEl = firstErrorEl || document.getElementById('alamat-pengiriman');
+            }
+
             if (!isValid && firstErrorEl) {
                 firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                if (firstErrorEl.tagName === 'INPUT') firstErrorEl.focus();
-                showToast('Mohon lengkapi data wajib dan pilih minimal 1 item.', 'error');
+                if (firstErrorEl.tagName === 'INPUT' || firstErrorEl.tagName === 'TEXTAREA') firstErrorEl.focus();
+                showToast('Mohon lengkapi data wajib terlebih dahulu.', 'error');
             }
 
             return isValid;
@@ -554,11 +655,16 @@
         function resetForm() {
             document.getElementById('nama-pemohon').value = '';
             document.getElementById('hp-pemohon').value = '';
+            document.getElementById('alamat-pengiriman').value = '';
             document.getElementById('catatan-tambahan').value = '';
+
+            const defaultRadio = document.querySelector('input[name="metode-pengambilan"][value="Diambil di Kantor LSP"]');
+            if (defaultRadio) defaultRadio.checked = true;
+            toggleAlamatPengiriman();
 
             mukItems = DEFAULT_MUK_LIST.map(item => ({ ...item }));
 
-            ['error-wa', 'error-nama', 'error-muk'].forEach(id => {
+            ['error-wa', 'error-nama', 'error-muk', 'error-alamat'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
 
