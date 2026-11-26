@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Pencatatan Admin / Logistik MUK LSP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS (Excel .xlsx) & jsPDF (PDF Export) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Notifikasi Toast -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Modal Paste dari WhatsApp -->
+    <div id="paste-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Impor Pesan Permohonan dari WhatsApp</h3>
+                        <p class="text-[11px] text-slate-500">Tempel pesan yang masuk dari asesor untuk mengisi form otomatis</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closePasteModal()" class="text-slate-400 hover:text-slate-600 p-1.5">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div>
+                <textarea id="raw-wa-input" rows="7" placeholder="Tempel (Paste) teks pesan permohonan stok MUK dari WhatsApp di sini..."
+                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <button type="button" onclick="closePasteModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                    Batal
+                </button>
+                <button type="button" onclick="parseWhatsAppText()" class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Ekstrak ke Form</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detail Pesanan & Alamat -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                    <h3 id="detail-modal-nama" class="text-base font-bold text-slate-900">Detail Pesanan</h3>
+                    <p id="detail-modal-meta" class="text-xs text-slate-500"></p>
+                </div>
+                <button type="button" onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 p-1.5">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="detail-modal-body" class="space-y-3 text-xs text-slate-700"></div>
+            <div class="flex justify-end pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeDetailModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-trash-can"></i>
+                </span>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900">Hapus Catatan Pesanan?</h3>
+                    <p id="delete-modal-desc" class="text-xs text-slate-500 mt-0.5"></p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200">
+                    Batal
+                </button>
+                <button type="button" id="confirm-delete-btn" class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700">
+                    Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-md shadow-primary-500/20">
+                    <i class="fa-solid fa-boxes-stacked text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 text-sm sm:text-lg leading-tight">Rekap Admin & Logistik MUK</h1>
+                    <p class="text-[11px] sm:text-xs text-slate-500">Pencatatan & Monitoring Permohonan Asesor LSP</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="openSheetConfigModal()" id="btn-gsheet-status" class="text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-table"></i>
+                    <span id="gsheet-badge-text" class="hidden md:inline">Hubungkan Google Sheet</span>
+                </button>
+                <button type="button" onclick="syncFromGoogleSheet(true)" id="btn-sync-sheet" class="hidden text-xs sm:text-sm bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5" title="Tarik data terbaru dari Google Sheets">
+                    <i class="fa-solid fa-rotate" id="sync-icon"></i>
+                    <span class="hidden sm:inline">Sinkron</span>
+                </button>
+                <button type="button" onclick="exportToExcel()" class="text-xs sm:text-sm bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5" title="Unduh file Microsoft Excel (.xlsx)">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span class="hidden sm:inline">Excel</span>
+                </button>
+                <button type="button" onclick="exportToPDF()" class="text-xs sm:text-sm bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5" title="Unduh laporan format PDF (.pdf)">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span class="hidden sm:inline">PDF</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modal Pengaturan Link Google Sheets -->
+    <div id="gsheet-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                        <i class="fa-solid fa-table text-lg"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Koneksi Database Google Sheets</h3>
+                        <p class="text-[11px] text-slate-500">Simpan & sinkronkan rekap pesanan otomatis ke Google Spreadsheet</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeSheetConfigModal()" class="text-slate-400 hover:text-slate-600 p-1.5">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-600">
+                <div>
+                    <label for="gsheet-url-input" class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        URL Web App Google Apps Script
+                    </label>
+                    <input type="url" id="gsheet-url-input" placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none">
+                </div>
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 space-y-1 text-[11px] text-slate-700 leading-relaxed">
+                    <strong class="text-emerald-900 block"><i class="fa-solid fa-circle-info mr-1"></i>Cara Singkat Menghubungkan:</strong>
+                    <ol class="list-decimal list-inside space-y-0.5">
+                        <li>Buka Google Sheets &rarr; menu <strong>Extensions &gt; Apps Script</strong>.</li>
+                        <li>Tempel kode dari file <code>google_apps_script_muk.gs</code> lalu klik <strong>Deploy &gt; New deployment (Web app)</strong>.</li>
+                        <li>Atur <em>Who has access</em> ke <strong>Anyone</strong>, lalu salin <strong>Web app URL</strong> ke kotak di atas.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="disconnectGoogleSheet()" class="px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors">
+                    Putuskan Koneksi
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeSheetConfigModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                        Batal
+                    </button>
+                    <button type="button" onclick="saveGoogleSheetConfig()" class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary-600 hover:bg-primary-700 transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-link"></i>
+                        <span>Simpan & Sinkronkan</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Ringkasan Statistik Dashboard -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-medium text-slate-500">Total Pesanan</span>
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs"><i class="fa-solid fa-list-check"></i></span>
+                </div>
+                <div class="text-2xl font-bold text-slate-900" id="stat-total-pesanan">0</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Permohonan tercatat</p>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-medium text-slate-500">Perlu Disiapkan</span>
+                    <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-xs"><i class="fa-solid fa-clock"></i></span>
+                </div>
+                <div class="text-2xl font-bold text-amber-600" id="stat-pending">0</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Menunggu / Proses cetak</p>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-medium text-slate-500">Selesai / Terkirim</span>
+                    <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs"><i class="fa-solid fa-circle-check"></i></span>
+                </div>
+                <div class="text-2xl font-bold text-emerald-600" id="stat-selesai">0</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Sudah diambil / dikirim</p>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-medium text-slate-500">Total Eksemplar</span>
+                    <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs"><i class="fa-solid fa-layer-group"></i></span>
+                </div>
+                <div class="text-2xl font-bold text-indigo-600" id="stat-total-eks">0</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Akumulasi seluruh MUK</p>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Kolom Kiri: Form Pencatatan Pesanan Masuk (5 Kolom) -->
+            <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                    <div>
+                        <h2 id="form-title" class="font-bold text-slate-900 text-base">Catat Pesanan Baru</h2>
+                        <p class="text-xs text-slate-500">Input manual atau tempel pesan WA dari asesor</p>
+                    </div>
+                    <button type="button" onclick="openPasteModal()" class="text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        <span>Paste dari WA</span>
+                    </button>
+                </div>
+
+                <input type="hidden" id="edit-order-id" value="">
+
+                <!-- Tanggal & Nama Asesor -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label for="rec-tanggal" class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Tanggal Catat <span class="text-red-500">*</span></label>
+                        <input type="date" id="rec-tanggal" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                    <div>
+                        <label for="rec-status" class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Status Logistik</label>
+                        <select id="rec-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none">
+                            <option value="Menunggu Disiapkan">Menunggu Disiapkan</option>
+                            <option value="Sedang Dicetak / Packing">Sedang Dicetak / Packing</option>
+                            <option value="Siap Diambil">Siap Diambil</option>
+                            <option value="Sudah Dikirim (Kurir)">Sudah Dikirim (Kurir)</option>
+                            <option value="Selesai Diambil">Selesai Diambil</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label for="rec-nama" class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Nama Asesor / Pemohon <span class="text-red-500">*</span></label>
+                        <input type="text" id="rec-nama" placeholder="Contoh: Khaeron, SH." class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                    <div>
+                        <label for="rec-hp" class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">No. HP / WA</label>
+                        <input type="tel" id="rec-hp" placeholder="088808736052" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- Rincian Jumlah per Item MUK -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider">Rincian Stok MUK & Dokumen <span class="text-red-500">*</span></label>
+                        <button type="button" onclick="resetFormQuantities()" class="text-[11px] text-slate-500 hover:text-red-600 font-medium">Reset 0</button>
+                    </div>
+                    <div id="admin-muk-inputs" class="space-y-2 max-h-[290px] overflow-y-auto pr-1">
+                        <!-- Di-render lewat JS -->
+                    </div>
+                </div>
+
+                <!-- Metode & Alamat -->
+                <div class="space-y-3 pt-2 border-t border-slate-100">
+                    <div>
+                        <label for="rec-metode" class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Metode Pengambilan / Kirim</label>
+                        <select id="rec-metode" onchange="toggleAdminAlamat()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none">
+                            <option value="Diambil di Kantor LSP">Diambil di Kantor LSP</option>
+                            <option value="Mohon Kirim ke Alamat">Mohon Kirim ke Alamat</option>
+                        </select>
+                    </div>
+
+                    <div id="admin-alamat-box" class="hidden">
+                        <label for="rec-alamat" class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Detail Penerima & Alamat Pengiriman</label>
+                        <textarea id="rec-alamat" rows="3" placeholder="Nama penerima, alamat lengkap, no HP..." class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="rec-catatan" class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Catatan Admin / No. Resi (Opsional)</label>
+                        <input type="text" id="rec-catatan" placeholder="Contoh: Resi JNE 123456 / Diambil tgl 28" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- Tombol Simpan -->
+                <div class="flex items-center gap-2.5 pt-2">
+                    <button type="button" onclick="saveOrderRecord()" class="flex-grow py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-primary-500/20 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span id="btn-save-text">Simpan ke Rekap</span>
+                    </button>
+                    <button type="button" id="btn-cancel-edit" onclick="resetAdminForm()" class="hidden py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition-colors">
+                        Batal
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kolom Kanan: Tabel Rekapitulasi & Ringkasan Total per Jenis MUK (7 Kolom) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- Kartu Akumulasi Kebutuhan Stok per Jenis MUK -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div>
+                            <h2 class="font-bold text-slate-900 text-sm sm:text-base">Rekap Total Kebutuhan per Item MUK</h2>
+                            <p class="text-xs text-slate-500">Akumulasi jumlah eksemplar dari seluruh pesanan tercatat</p>
+                        </div>
+                        <span class="text-[11px] font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg">Otomatis Terhitung</span>
+                    </div>
+                    <div id="item-totals-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <!-- Di-render lewat JS -->
+                    </div>
+                </section>
+
+                <!-- Kartu Daftar Riwayat Pesanan -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex flex-col gap-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h2 class="font-bold text-slate-900 text-sm sm:text-base">Tabel Rekap Pesanan Asesor</h2>
+                                <p class="text-xs text-slate-500">Tampilan tabel terstruktur &bull; Klik status untuk update progres langsung</p>
+                            </div>
+
+                            <!-- Pengalih Tampilan Tabel / Kartu -->
+                            <div class="inline-flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                                <button type="button" id="btn-view-table" onclick="setOrdersViewMode('table')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-2xs transition-all flex items-center gap-1.5">
+                                    <i class="fa-solid fa-table-list text-primary-600"></i>
+                                    <span>Tabel</span>
+                                </button>
+                                <button type="button" id="btn-view-card" onclick="setOrdersViewMode('card')" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+                                    <i class="fa-solid fa-grip"></i>
+                                    <span>Kartu</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter & Pencarian -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                            <div class="relative flex-grow sm:flex-grow-0">
+                                <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+                                <input type="text" id="search-input" oninput="renderOrdersTable()" placeholder="Cari nama asesor / HP / item..." 
+                                    class="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-primary-500 outline-none w-full sm:w-56">
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <select id="filter-metode" onchange="renderOrdersTable()" class="flex-1 sm:flex-initial px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-primary-500 outline-none">
+                                    <option value="ALL">Semua Metode</option>
+                                    <option value="Diambil di Kantor LSP">Diambil di LSP</option>
+                                    <option value="Mohon Kirim ke Alamat">Kirim ke Alamat</option>
+                                </select>
+                                <select id="filter-status" onchange="renderOrdersTable()" class="flex-1 sm:flex-initial px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-primary-500 outline-none">
+                                    <option value="ALL">Semua Status</option>
+                                    <option value="Menunggu Disiapkan">Menunggu Disiapkan</option>
+                                    <option value="Sedang Dicetak / Packing">Sedang Dicetak / Packing</option>
+                                    <option value="Siap Diambil">Siap Diambil</option>
+                                    <option value="Sudah Dikirim (Kurir)">Sudah Dikirim (Kurir)</option>
+                                    <option value="Selesai Diambil">Selesai Diambil</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Tabel / Kartu Pesanan -->
+                    <div id="orders-list-container" class="overflow-x-auto max-h-[650px] overflow-y-auto">
+                        <!-- Di-render lewat JS -->
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-5 mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
+            &copy; <span id="year-now"></span> Sistem Pencatatan & Rekap Logistik MUK &bull; Admin / Logistik LSP
+        </div>
+    </footer>
+
+    <script>
+        const STORAGE_KEY_RECORDS = 'lsp_muk_admin_records_v1';
+        const STORAGE_KEY_GSHEET_URL = 'lsp_muk_gsheet_webapp_url_v1';
+
+        const MUK_ITEMS_MASTER = [
+            { id: 'housekeeper', name: 'Skema Housekeeper' },
+            { id: 'caretaker', name: 'Skema Caretaker' },
+            { id: 'babysitter', name: 'Skema Babysitter' },
+            { id: 'sprint-housekeeper', name: 'Sprint Housekeeper' },
+            { id: 'sprint-caretaker', name: 'Sprint Caretaker' },
+            { id: 'sprint-baby', name: 'Sprint Baby' },
+            { id: 'verifikasi-tuk', name: 'Verifikasi TUK' },
+            { id: 'tanda-terima-sertifikat', name: 'Form Tanda Terima Sertifikat' }
+        ];
+
+        let orderRecords = [];
+        let formQuantities = {};
+        let deleteTargetId = null;
+        let currentViewMode = 'table';
+        let gsheetWebAppUrl = '';
+
+        // Inisialisasi Halaman
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('year-now').textContent = new Date().getFullYear();
+            setTodayDate();
+            initFormQuantities();
+            loadGoogleSheetConfig();
+            loadRecordsFromStorage();
+            renderAdminMukInputs();
+            renderAllViews();
+
+            if (gsheetWebAppUrl) {
+                syncFromGoogleSheet(false);
+            }
+        });
+
+        function loadGoogleSheetConfig() {
+            gsheetWebAppUrl = localStorage.getItem(STORAGE_KEY_GSHEET_URL) || '';
+            updateGoogleSheetStatusUI();
+        }
+
+        function updateGoogleSheetStatusUI() {
+            const btnStatus = document.getElementById('btn-gsheet-status');
+            const badgeText = document.getElementById('gsheet-badge-text');
+            const btnSync = document.getElementById('btn-sync-sheet');
+
+            if (gsheetWebAppUrl) {
+                btnStatus.className = 'text-xs sm:text-sm bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5';
+                badgeText.textContent = 'Google Sheet Aktif';
+                btnSync.classList.remove('hidden');
+            } else {
+                btnStatus.className = 'text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5';
+                badgeText.textContent = 'Hubungkan Google Sheet';
+                btnSync.classList.add('hidden');
+            }
+        }
+
+        function openSheetConfigModal() {
+            document.getElementById('gsheet-url-input').value = gsheetWebAppUrl;
+            const modal = document.getElementById('gsheet-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeSheetConfigModal() {
+            const modal = document.getElementById('gsheet-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveGoogleSheetConfig() {
+            const urlVal = document.getElementById('gsheet-url-input').value.trim();
+            if (!urlVal || !urlVal.startsWith('https://script.google.com/')) {
+                showToast('Masukkan URL Web App Google Apps Script yang valid.', 'error');
+                return;
+            }
+            gsheetWebAppUrl = urlVal;
+            localStorage.setItem(STORAGE_KEY_GSHEET_URL, gsheetWebAppUrl);
+            updateGoogleSheetStatusUI();
+            closeSheetConfigModal();
+            syncFromGoogleSheet(true);
+        }
+
+        function disconnectGoogleSheet() {
+            gsheetWebAppUrl = '';
+            localStorage.removeItem(STORAGE_KEY_GSHEET_URL);
+            updateGoogleSheetStatusUI();
+            closeSheetConfigModal();
+            showToast('Koneksi Google Sheets diputuskan.', 'info');
+        }
+
+        // Tarik data terbaru dari Google Sheets
+        async function syncFromGoogleSheet(showNotification = true) {
+            if (!gsheetWebAppUrl) return;
+            const icon = document.getElementById('sync-icon');
+            if (icon) icon.classList.add('fa-spin');
+
+            try {
+                const response = await fetch(gsheetWebAppUrl);
+                const data = await response.json();
+                if (data && data.status === 'success' && Array.isArray(data.records)) {
+                    orderRecords = data.records;
+                    saveRecordsToStorage();
+                    renderAllViews();
+                    if (showNotification) {
+                        showToast(`Berhasil sinkron ${orderRecords.length} data dari Google Sheets!`, 'success');
+                    }
+                } else if (showNotification) {
+                    showToast('Gagal membaca format data Google Sheets.', 'error');
+                }
+            } catch (err) {
+                if (showNotification) {
+                    showToast('Tidak dapat terhubung ke Google Sheets. Pastikan akses Web App "Anyone".', 'error');
+                }
+            } finally {
+                if (icon) icon.classList.remove('fa-spin');
+            }
+        }
+
+        // Kirim perubahan (tambah/update/hapus) ke Google Sheets secara otomatis
+        async function pushRecordToGoogleSheet(action, payloadObj) {
+            if (!gsheetWebAppUrl) return;
+            try {
+                await fetch(gsheetWebAppUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action, ...payloadObj })
+                });
+            } catch (err) {
+                console.error('Gagal mengirim ke Google Sheets:', err);
+            }
+        }
+
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('rec-tanggal').value = today;
+        }
+
+        function initFormQuantities() {
+            MUK_ITEMS_MASTER.forEach(item => {
+                formQuantities[item.id] = 0;
+            });
+        }
+
+        function loadRecordsFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_RECORDS);
+                if (raw) {
+                    orderRecords = JSON.parse(raw);
+                } else {
+                    // Contoh data awal agar admin langsung melihat tampilan rekap
+                    orderRecords = [
+                        {
+                            id: 'ORD-' + Date.now(),
+                            tanggal: new Date().toISOString().split('T')[0],
+                            nama: 'Khaeron, SH.',
+                            hp: '0888 0873 6052',
+                            items: {
+                                'housekeeper': 5,
+                                'sprint-housekeeper': 5,
+                                'verifikasi-tuk': 1
+                            },
+                            metode: 'Mohon Kirim ke Alamat',
+                            alamat: 'PENERIMA : Bapak. KHAERON SH.\nAlamat : Perumahan cempaka wangi regency, Blok A No. 21, Jln. Sultan Agung Tirtayasa Cempaka, Kec. Talun, Kab. Cirebon, Jawa Barat.\nTlp/Hp : 0888 0873 6052',
+                            catatan: 'Contoh data rekap awal',
+                            status: 'Menunggu Disiapkan'
+                        }
+                    ];
+                    saveRecordsToStorage();
+                }
+            } catch (e) {
+                orderRecords = [];
+            }
+        }
+
+        function saveRecordsToStorage() {
+            localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(orderRecords));
+        }
+
+        // Render Input Jumlah per Item MUK pada Form Admin
+        function renderAdminMukInputs() {
+            const container = document.getElementById('admin-muk-inputs');
+            container.innerHTML = '';
+
+            MUK_ITEMS_MASTER.forEach(item => {
+                const qty = formQuantities[item.id] || 0;
+                const row = document.createElement('div');
+                row.id = `admin-muk-row-${item.id}`;
+                row.className = `flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-xs ${
+                    qty > 0 ? 'bg-primary-50/60 border-primary-300' : 'bg-slate-50 border-slate-200'
+                }`;
+
+                row.innerHTML = `
+                    <span class="font-medium ${qty > 0 ? 'text-primary-900 font-semibold' : 'text-slate-700'}">${escapeHtml(item.name)}</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="changeAdminQty('${item.id}', -1)" class="w-7 h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center">-</button>
+                        <input type="number" min="0" value="${qty}" oninput="setAdminQty('${item.id}', this.value)"
+                            class="w-12 h-7 text-center bg-white border border-slate-300 rounded-lg font-bold text-slate-900 outline-none focus:border-primary-500">
+                        <button type="button" onclick="changeAdminQty('${item.id}', 1)" class="w-7 h-7 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-bold flex items-center justify-center">+</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function changeAdminQty(id, delta) {
+            formQuantities[id] = Math.max(0, (formQuantities[id] || 0) + delta);
+            renderAdminMukInputs();
+        }
+
+        function setAdminQty(id, val) {
+            const num = parseInt(val, 10);
+            const cleanNum = isNaN(num) || num < 0 ? 0 : num;
+            formQuantities[id] = cleanNum;
+
+            const row = document.getElementById(`admin-muk-row-${id}`);
+            if (row) {
+                const active = cleanNum > 0;
+                row.className = `flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-xs ${
+                    active ? 'bg-primary-50/60 border-primary-300' : 'bg-slate-50 border-slate-200'
+                }`;
+                const titleSpan = row.querySelector('span');
+                if (titleSpan) {
+                    titleSpan.className = `font-medium ${active ? 'text-primary-900 font-semibold' : 'text-slate-700'}`;
+                }
+            }
+        }
+
+        // Simpan atau Update Pesanan ke Rekap
+        function saveOrderRecord() {
+            const editId = document.getElementById('edit-order-id').value;
+            const tanggal = document.getElementById('rec-tanggal').value;
+            const nama = document.getElementById('rec-nama').value.trim();
+            const hp = document.getElementById('rec-hp').value.trim();
+            const metode = document.getElementById('rec-metode').value;
+            const alamat = document.getElementById('rec-alamat').value.trim();
+            const catatan = document.getElementById('rec-catatan').value.trim();
+            const status = document.getElementById('rec-status').value;
+
+            if (!tanggal || !nama) {
+                showToast('Tanggal dan Nama Asesor / Pemohon wajib diisi.', 'error');
+                return;
+            }
+
+            const selectedItems = {};
+            let totalQty = 0;
+            MUK_ITEMS_MASTER.forEach(item => {
+                const q = parseInt(formQuantities[item.id], 10) || 0;
+                if (q > 0) {
+                    selectedItems[item.id] = q;
+                    totalQty += q;
+                }
+            });
+
+            if (totalQty === 0) {
+                showToast('Isi minimal 1 jumlah item MUK/dokumen.', 'error');
+                return;
+            }
+
+            if (editId) {
+                const idx = orderRecords.findIndex(r => r.id === editId);
+                if (idx !== -1) {
+                    orderRecords[idx] = {
+                        ...orderRecords[idx],
+                        tanggal, nama, hp, items: selectedItems, metode, alamat, catatan, status
+                    };
+                    pushRecordToGoogleSheet('upsert', { record: orderRecords[idx] });
+                    showToast(gsheetWebAppUrl ? 'Data diperbarui & tersimpan ke Google Sheets!' : 'Data pesanan berhasil diperbarui!', 'success');
+                }
+            } else {
+                const newRecord = {
+                    id: 'ORD-' + Date.now(),
+                    tanggal,
+                    nama,
+                    hp,
+                    items: selectedItems,
+                    metode,
+                    alamat,
+                    catatan,
+                    status
+                };
+                orderRecords.unshift(newRecord);
+                pushRecordToGoogleSheet('upsert', { record: newRecord });
+                showToast(gsheetWebAppUrl ? 'Pesanan tersimpan otomatis ke Google Sheets!' : 'Pesanan baru berhasil dicatat ke rekap!', 'success');
+            }
+
+            saveRecordsToStorage();
+            resetAdminForm();
+            renderAllViews();
+        }
+
+        // Muat data ke Form untuk di-Edit
+        function editOrderRecord(id) {
+            const rec = orderRecords.find(r => r.id === id);
+            if (!rec) return;
+
+            document.getElementById('edit-order-id').value = rec.id;
+            document.getElementById('rec-tanggal').value = rec.tanggal;
+            document.getElementById('rec-nama').value = rec.nama;
+            document.getElementById('rec-hp').value = rec.hp || '';
+            document.getElementById('rec-metode').value = rec.metode;
+            document.getElementById('rec-alamat').value = rec.alamat || '';
+            document.getElementById('rec-catatan').value = rec.catatan || '';
+            document.getElementById('rec-status').value = rec.status;
+
+            initFormQuantities();
+            Object.keys(rec.items || {}).forEach(k => {
+                formQuantities[k] = rec.items[k];
+            });
+
+            toggleAdminAlamat();
+            renderAdminMukInputs();
+
+            document.getElementById('form-title').textContent = 'Edit Catatan Pesanan';
+            document.getElementById('btn-save-text').textContent = 'Simpan Perubahan';
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetAdminForm() {
+            document.getElementById('edit-order-id').value = '';
+            setTodayDate();
+            document.getElementById('rec-nama').value = '';
+            document.getElementById('rec-hp').value = '';
+            document.getElementById('rec-metode').value = 'Diambil di Kantor LSP';
+            document.getElementById('rec-alamat').value = '';
+            document.getElementById('rec-catatan').value = '';
+            document.getElementById('rec-status').value = 'Menunggu Disiapkan';
+
+            toggleAdminAlamat();
+            resetFormQuantities();
+
+            document.getElementById('form-title').textContent = 'Catat Pesanan Baru';
+            document.getElementById('btn-save-text').textContent = 'Simpan ke Rekap';
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+        }
+
+        // Ubah status langsung dari kartu rekap
+        function quickUpdateStatus(id, newStatus) {
+            const rec = orderRecords.find(r => r.id === id);
+            if (!rec) return;
+            rec.status = newStatus;
+            saveRecordsToStorage();
+            pushRecordToGoogleSheet('upsert', { record: rec });
+            renderAllViews();
+            showToast(`Status diperbarui${gsheetWebAppUrl ? ' ke Google Sheets' : ''}: ${newStatus}`, 'info');
+        }
+
+        // Modal Konfirmasi Hapus
+        function openDeleteModal(id, nama) {
+            deleteTargetId = id;
+            document.getElementById('delete-modal-desc').textContent = `Yakin ingin menghapus catatan permohonan atas nama "${nama}"?`;
+            const modal = document.getElementById('delete-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            deleteTargetId = null;
+            const modal = document.getElementById('delete-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+            if (!deleteTargetId) return;
+            const deletedId = deleteTargetId;
+            orderRecords = orderRecords.filter(r => r.id !== deletedId);
+            saveRecordsToStorage();
+            pushRecordToGoogleSheet('delete', { id: deletedId });
+            closeDeleteModal();
+            renderAllViews();
+            showToast('Catatan pesanan telah dihapus.', 'info');
+        });
+
+        // Fitur Paste Otomatis dari Pesan WA
+        function openPasteModal() {
+            document.getElementById('raw-wa-input').value = '';
+            const modal = document.getElementById('paste-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('raw-wa-input').focus();
+        }
+
+        function closePasteModal() {
+            const modal = document.getElementById('paste-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function parseWhatsAppText() {
+            const raw = document.getElementById('raw-wa-input').value.trim();
+            if (!raw) {
+                showToast('Tempel teks pesan WhatsApp terlebih dahulu.', 'error');
+                return;
+            }
+
+            // Ekstrak Nama Asesor
+            const namaMatch = raw.match(/Nama Asesor \/ Pemohon:\*?\s*(.+)/i);
+            if (namaMatch && namaMatch[1]) {
+                document.getElementById('rec-nama').value = namaMatch[1].replace(/\*/g, '').trim();
+            }
+
+            // Ekstrak No HP
+            const hpMatch = raw.match(/No\. HP \/ WA:\*?\s*(.+)/i);
+            if (hpMatch && hpMatch[1]) {
+                document.getElementById('rec-hp').value = hpMatch[1].replace(/\*/g, '').trim();
+            }
+
+            // Ekstrak Jumlah Item MUK
+            initFormQuantities();
+            MUK_ITEMS_MASTER.forEach(item => {
+                const escapedName = item.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const itemRegex = new RegExp(`${escapedName}\\s*[—\\-]+\\s*\\*?(\\d+)\\s*eks`, 'i');
+                const match = raw.match(itemRegex);
+                if (match && match[1]) {
+                    formQuantities[item.id] = parseInt(match[1], 10) || 0;
+                }
+            });
+            renderAdminMukInputs();
+
+            // Ekstrak Metode & Alamat
+            if (/Mohon Kirim ke Alamat/i.test(raw)) {
+                document.getElementById('rec-metode').value = 'Mohon Kirim ke Alamat';
+                toggleAdminAlamat();
+
+                const alamatSection = raw.split(/Mohon Kirim ke Alamat/i)[1];
+                if (alamatSection) {
+                    const cleanAlamat = alamatSection
+                        .split(/\*CATATAN TAMBAHAN\*|━━━━━━━━━━━━━━━━━━━━━━/i)[0]
+                        .trim();
+                    document.getElementById('rec-alamat').value = cleanAlamat;
+                }
+            } else {
+                document.getElementById('rec-metode').value = 'Diambil di Kantor LSP';
+                toggleAdminAlamat();
+            }
+
+            closePasteModal();
+            showToast('Data dari pesan WA berhasil diekstrak ke form!', 'success');
+        }
+
+        // Render Semua Statistik, Rekap Item, dan Tabel Pesanan
+        function renderAllViews() {
+            renderStatistics();
+            renderItemTotalsGrid();
+            renderOrdersTable();
+        }
+
+        function renderStatistics() {
+            const totalPesanan = orderRecords.length;
+            const selesaiCount = orderRecords.filter(r => r.status === 'Sudah Dikirim (Kurir)' || r.status === 'Selesai Diambil').length;
+            const pendingCount = totalPesanan - selesaiCount;
+
+            let totalEks = 0;
+            orderRecords.forEach(rec => {
+                Object.values(rec.items || {}).forEach(q => {
+                    totalEks += (parseInt(q, 10) || 0);
+                });
+            });
+
+            document.getElementById('stat-total-pesanan').textContent = totalPesanan;
+            document.getElementById('stat-pending').textContent = pendingCount;
+            document.getElementById('stat-selesai').textContent = selesaiCount;
+            document.getElementById('stat-total-eks').textContent = totalEks;
+        }
+
+        function renderItemTotalsGrid() {
+            const grid = document.getElementById('item-totals-grid');
+            grid.innerHTML = '';
+
+            MUK_ITEMS_MASTER.forEach(item => {
+                let sum = 0;
+                orderRecords.forEach(rec => {
+                    sum += (parseInt(rec.items?.[item.id], 10) || 0);
+                });
+
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border ${sum > 0 ? 'bg-primary-50/40 border-primary-200' : 'bg-slate-50 border-slate-200'}`;
+                card.innerHTML = `
+                    <div class="text-[11px] font-medium text-slate-600 line-clamp-1" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+                    <div class="mt-1 flex items-baseline gap-1">
+                        <span class="text-lg font-bold ${sum > 0 ? 'text-primary-700' : 'text-slate-400'}">${sum}</span>
+                        <span class="text-[10px] text-slate-400">eks</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'Menunggu Disiapkan':
+                    return 'bg-amber-50 text-amber-700 border-amber-200';
+                case 'Sedang Dicetak / Packing':
+                    return 'bg-blue-50 text-blue-700 border-blue-200';
+                case 'Siap Diambil':
+                    return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                case 'Sudah Dikirim (Kurir)':
+                case 'Selesai Diambil':
+                    return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                default:
+                    return 'bg-slate-100 text-slate-700 border-slate-200';
+            }
+        }
+
+        function setOrdersViewMode(mode) {
+            currentViewMode = mode;
+            const btnTable = document.getElementById('btn-view-table');
+            const btnCard = document.getElementById('btn-view-card');
+
+            if (mode === 'table') {
+                btnTable.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-2xs transition-all flex items-center gap-1.5';
+                btnCard.className = 'px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5';
+            } else {
+                btnCard.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-2xs transition-all flex items-center gap-1.5';
+                btnTable.className = 'px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5';
+            }
+            renderOrdersTable();
+        }
+
+        function openDetailModal(id) {
+            const rec = orderRecords.find(r => r.id === id);
+            if (!rec) return;
+
+            document.getElementById('detail-modal-nama').textContent = rec.nama;
+            document.getElementById('detail-modal-meta').textContent = `${rec.tanggal} • ${rec.metode}`;
+
+            let itemsHtml = '';
+            let totalEks = 0;
+            MUK_ITEMS_MASTER.forEach(m => {
+                const q = parseInt(rec.items?.[m.id], 10) || 0;
+                if (q > 0) {
+                    totalEks += q;
+                    itemsHtml += `
+                        <div class="flex items-center justify-between py-1.5 border-b border-slate-100 last:border-none">
+                            <span class="text-slate-700">${escapeHtml(m.name)}</span>
+                            <span class="font-bold text-slate-900">${q} eks</span>
+                        </div>
+                    `;
+                }
+            });
+
+            const body = document.getElementById('detail-modal-body');
+            body.innerHTML = `
+                <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 space-y-1">
+                    <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Rincian Item MUK (${totalEks} Eksemplar)</div>
+                    ${itemsHtml}
+                </div>
+                ${rec.hp ? `<div><strong class="text-slate-800">No. HP / WA:</strong> ${escapeHtml(rec.hp)}</div>` : ''}
+                ${rec.alamat ? `
+                    <div class="bg-indigo-50/60 border border-indigo-100 rounded-xl p-3 whitespace-pre-line leading-relaxed">
+                        <strong class="text-indigo-900 block mb-1"><i class="fa-solid fa-location-dot mr-1"></i>Alamat Pengiriman:</strong>
+                        ${escapeHtml(rec.alamat)}
+                    </div>
+                ` : ''}
+                ${rec.catatan ? `<div><strong class="text-slate-800">Catatan Admin:</strong> ${escapeHtml(rec.catatan)}</div>` : ''}
+            `;
+
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detail-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function notifyAsesorWhatsApp(id) {
+            const rec = orderRecords.find(r => r.id === id);
+            if (!rec || !rec.hp) return;
+
+            let cleanPhone = rec.hp.replace(/\D/g, '');
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '62' + cleanPhone.slice(1);
+            } else if (!cleanPhone.startsWith('62')) {
+                cleanPhone = '62' + cleanPhone;
+            }
+
+            const msg = `Halo Bapak/Ibu *${rec.nama}*,\n\nKami dari *Admin / Logistik LSP* menginformasikan bahwa permohonan stok MUK & dokumen Anda (tanggal ${rec.tanggal}) saat ini berstatus: *${rec.status}*.\n\nMetode: ${rec.metode}${rec.catatan ? `\nCatatan: ${rec.catatan}` : ''}\n\nTerima kasih.`;
+            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+        }
+
+        function renderOrdersTable() {
+            const container = document.getElementById('orders-list-container');
+            const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const metodeFilter = document.getElementById('filter-metode').value;
+
+            const filtered = orderRecords.filter(rec => {
+                const itemNamesStr = MUK_ITEMS_MASTER
+                    .filter(m => (parseInt(rec.items?.[m.id], 10) || 0) > 0)
+                    .map(m => m.name.toLowerCase())
+                    .join(' ');
+                const matchSearch = rec.nama.toLowerCase().includes(searchQuery) ||
+                    (rec.hp && rec.hp.toLowerCase().includes(searchQuery)) ||
+                    itemNamesStr.includes(searchQuery);
+                const matchStatus = statusFilter === 'ALL' || rec.status === statusFilter;
+                const matchMetode = metodeFilter === 'ALL' || rec.metode === metodeFilter;
+                return matchSearch && matchStatus && matchMetode;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="p-10 text-center">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                            <i class="fa-solid fa-folder-open text-lg"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-700">Belum ada data pesanan ditemukan</p>
+                        <p class="text-xs text-slate-500 mt-1">Gunakan form di sebelah kiri atau tombol "Paste dari WA" untuk mencatat permohonan.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (currentViewMode === 'table') {
+                let rowsHtml = '';
+                filtered.forEach((rec, index) => {
+                    const itemChips = [];
+                    let totalEks = 0;
+
+                    MUK_ITEMS_MASTER.forEach(m => {
+                        const q = parseInt(rec.items?.[m.id], 10) || 0;
+                        if (q > 0) {
+                            totalEks += q;
+                            itemChips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-medium whitespace-nowrap">${escapeHtml(m.name)} <strong class="text-primary-700 bg-primary-50 px-1 rounded">${q}</strong></span>`);
+                        }
+                    });
+
+                    const isKirim = rec.metode === 'Mohon Kirim ke Alamat';
+
+                    rowsHtml += `
+                        <tr class="hover:bg-slate-50/90 transition-colors align-top group">
+                            <td class="px-3.5 py-3.5 text-xs font-semibold text-slate-400 text-center whitespace-nowrap">
+                                ${index + 1}
+                            </td>
+                            <td class="px-3.5 py-3.5 whitespace-nowrap">
+                                <div class="font-bold text-slate-900 text-xs sm:text-sm">${escapeHtml(rec.nama)}</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+                                    <span><i class="fa-regular fa-calendar mr-1"></i>${escapeHtml(rec.tanggal)}</span>
+                                    ${rec.hp ? `<span>&bull; ${escapeHtml(rec.hp)}</span>` : ''}
+                                </div>
+                                ${rec.catatan ? `<div class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200/80 rounded px-1.5 py-0.5 mt-1.5 inline-block max-w-[200px] truncate" title="${escapeHtml(rec.catatan)}"><i class="fa-regular fa-note-sticky mr-1"></i>${escapeHtml(rec.catatan)}</div>` : ''}
+                            </td>
+                            <td class="px-3.5 py-3.5">
+                                <div class="flex flex-wrap gap-1 max-w-xs">
+                                    ${itemChips.join('')}
+                                </div>
+                                <div class="text-[11px] font-semibold text-slate-500 mt-1.5">
+                                    Total: <span class="text-slate-900">${totalEks} eksemplar</span>
+                                </div>
+                            </td>
+                            <td class="px-3.5 py-3.5 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${
+                                    isKirim ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-700 border border-slate-200'
+                                }">
+                                    <i class="fa-solid ${isKirim ? 'fa-truck-fast' : 'fa-building-user'}"></i>
+                                    ${isKirim ? 'Kirim ke Alamat' : 'Diambil di LSP'}
+                                </span>
+                                ${isKirim && rec.alamat ? `
+                                    <button type="button" onclick="openDetailModal('${rec.id}')" class="block mt-1.5 text-[11px] font-medium text-indigo-600 hover:text-indigo-800 underline">
+                                        Lihat Alamat Lengkap
+                                    </button>
+                                ` : ''}
+                            </td>
+                            <td class="px-3.5 py-3.5 whitespace-nowrap">
+                                <select onchange="quickUpdateStatus('${rec.id}', this.value)"
+                                    class="text-[11px] font-semibold px-2.5 py-1.5 rounded-xl border outline-none cursor-pointer transition-colors ${getStatusBadgeClass(rec.status)}">
+                                    <option value="Menunggu Disiapkan" ${rec.status === 'Menunggu Disiapkan' ? 'selected' : ''}>Menunggu Disiapkan</option>
+                                    <option value="Sedang Dicetak / Packing" ${rec.status === 'Sedang Dicetak / Packing' ? 'selected' : ''}>Sedang Dicetak / Packing</option>
+                                    <option value="Siap Diambil" ${rec.status === 'Siap Diambil' ? 'selected' : ''}>Siap Diambil</option>
+                                    <option value="Sudah Dikirim (Kurir)" ${rec.status === 'Sudah Dikirim (Kurir)' ? 'selected' : ''}>Sudah Dikirim (Kurir)</option>
+                                    <option value="Selesai Diambil" ${rec.status === 'Selesai Diambil' ? 'selected' : ''}>Selesai Diambil</option>
+                                </select>
+                            </td>
+                            <td class="px-3.5 py-3.5 whitespace-nowrap text-right">
+                                <div class="inline-flex items-center gap-1">
+                                    ${rec.hp ? `
+                                        <button type="button" onclick="notifyAsesorWhatsApp('${rec.id}')" title="Kirim Info Status ke WA Asesor"
+                                            class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center transition-colors">
+                                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                                        </button>
+                                    ` : ''}
+                                    <button type="button" onclick="openDetailModal('${rec.id}')" title="Detail Lengkap"
+                                        class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors">
+                                        <i class="fa-regular fa-eye text-xs"></i>
+                                    </button>
+                                    <button type="button" onclick="editOrderRecord('${rec.id}')" title="Edit Pesanan"
+                                        class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 flex items-center justify-center transition-colors">
+                                        <i class="fa-regular fa-pen-to-square text-xs"></i>
+                                    </button>
+                                    <button type="button" onclick="openDeleteModal('${rec.id}', '${escapeHtml(rec.nama).replace(/'/g, "\\'")}')" title="Hapus"
+                                        class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors">
+                                        <i class="fa-regular fa-trash-can text-xs"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                container.innerHTML = `
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                <th class="px-3.5 py-3 text-center w-10">No</th>
+                                <th class="px-3.5 py-3">Asesor / Tanggal</th>
+                                <th class="px-3.5 py-3">Rincian Stok MUK</th>
+                                <th class="px-3.5 py-3">Pengambilan</th>
+                                <th class="px-3.5 py-3">Status</th>
+                                <th class="px-3.5 py-3 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                // Mode Tampilan Kartu (Mobile Friendly)
+                let cardsHtml = '<div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3.5">';
+                filtered.forEach(rec => {
+                    const itemChips = [];
+                    let totalEks = 0;
+
+                    MUK_ITEMS_MASTER.forEach(m => {
+                        const q = parseInt(rec.items?.[m.id], 10) || 0;
+                        if (q > 0) {
+                            totalEks += q;
+                            itemChips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-medium">${escapeHtml(m.name)} <strong class="text-primary-700">${q}</strong></span>`);
+                        }
+                    });
+
+                    cardsHtml += `
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs space-y-3 flex flex-col justify-between">
+                            <div class="space-y-2.5">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div>
+                                        <h3 class="font-bold text-slate-900 text-sm">${escapeHtml(rec.nama)}</h3>
+                                        <p class="text-[11px] text-slate-500">${escapeHtml(rec.tanggal)} ${rec.hp ? `&bull; ${escapeHtml(rec.hp)}` : ''}</p>
+                                    </div>
+                                    <span class="text-xs font-bold text-primary-700 bg-primary-50 border border-primary-200 px-2 py-0.5 rounded-lg shrink-0">
+                                        ${totalEks} eks
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap gap-1">
+                                    ${itemChips.join('')}
+                                </div>
+                                <div class="text-[11px] text-slate-600 pt-1 border-t border-slate-100">
+                                    <strong>Metode:</strong> ${escapeHtml(rec.metode)}
+                                </div>
+                            </div>
+                            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                                <select onchange="quickUpdateStatus('${rec.id}', this.value)"
+                                    class="text-[11px] font-semibold px-2 py-1 rounded-lg border outline-none ${getStatusBadgeClass(rec.status)}">
+                                    <option value="Menunggu Disiapkan" ${rec.status === 'Menunggu Disiapkan' ? 'selected' : ''}>Menunggu Disiapkan</option>
+                                    <option value="Sedang Dicetak / Packing" ${rec.status === 'Sedang Dicetak / Packing' ? 'selected' : ''}>Sedang Dicetak / Packing</option>
+                                    <option value="Siap Diambil" ${rec.status === 'Siap Diambil' ? 'selected' : ''}>Siap Diambil</option>
+                                    <option value="Sudah Dikirim (Kurir)" ${rec.status === 'Sudah Dikirim (Kurir)' ? 'selected' : ''}>Sudah Dikirim (Kurir)</option>
+                                    <option value="Selesai Diambil" ${rec.status === 'Selesai Diambil' ? 'selected' : ''}>Selesai Diambil</option>
+                                </select>
+                                <div class="flex items-center gap-1">
+                                    ${rec.hp ? `<button type="button" onclick="notifyAsesorWhatsApp('${rec.id}')" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center"><i class="fa-brands fa-whatsapp text-xs"></i></button>` : ''}
+                                    <button type="button" onclick="editOrderRecord('${rec.id}')" class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center"><i class="fa-regular fa-pen-to-square text-xs"></i></button>
+                                    <button type="button" onclick="openDeleteModal('${rec.id}', '${escapeHtml(rec.nama).replace(/'/g, "\\'")}')" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center"><i class="fa-regular fa-trash-can text-xs"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                cardsHtml += '</div>';
+                container.innerHTML = cardsHtml;
+            }
+        }
+
+        // Export Rekap ke File Microsoft Excel Asli (.xlsx)
+        function exportToExcel() {
+            if (typeof XLSX === 'undefined') {
+                showToast('Pustaka Excel gagal dimuat. Periksa koneksi internet Anda.', 'error');
+                return;
+            }
+            if (orderRecords.length === 0) {
+                showToast('Belum ada data untuk di-export ke Excel.', 'error');
+                return;
+            }
+
+            const dateStr = new Date().toISOString().split('T')[0];
+
+            // Sheet 1: Daftar Rincian Pesanan Asesor
+            const headers = [
+                'No',
+                'Tanggal',
+                'Nama Asesor / Pemohon',
+                'No HP / WA',
+                ...MUK_ITEMS_MASTER.map(m => m.name),
+                'Total Eksemplar',
+                'Metode Pengambilan/Kirim',
+                'Alamat Pengiriman',
+                'Status Logistik',
+                'Catatan'
+            ];
+
+            const rows = orderRecords.map((rec, idx) => {
+                let totalEks = 0;
+                const itemCols = MUK_ITEMS_MASTER.map(m => {
+                    const q = parseInt(rec.items?.[m.id], 10) || 0;
+                    totalEks += q;
+                    return q;
+                });
+
+                return [
+                    idx + 1,
+                    rec.tanggal,
+                    rec.nama,
+                    rec.hp || '-',
+                    ...itemCols,
+                    totalEks,
+                    rec.metode,
+                    (rec.alamat || '-').replace(/\r?\n/g, ' | '),
+                    rec.status,
+                    rec.catatan || '-'
+                ];
+            });
+
+            // Baris Total Akumulasi di bagian bawah tabel Excel
+            const totalPerItem = MUK_ITEMS_MASTER.map(m =>
+                orderRecords.reduce((sum, rec) => sum + (parseInt(rec.items?.[m.id], 10) || 0), 0)
+            );
+            const grandTotalEks = totalPerItem.reduce((a, b) => a + b, 0);
+
+            const totalRow = [
+                '',
+                '',
+                'TOTAL AKUMULASI STOK MUK',
+                '',
+                ...totalPerItem,
+                grandTotalEks,
+                '',
+                '',
+                '',
+                ''
+            ];
+
+            const wsData = [headers, ...rows, totalRow];
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Atur lebar kolom agar rapi saat dibuka di Excel
+            ws['!cols'] = [
+                { wch: 5 },  // No
+                { wch: 13 }, // Tanggal
+                { wch: 24 }, // Nama Asesor
+                { wch: 16 }, // No HP
+                ...MUK_ITEMS_MASTER.map(() => ({ wch: 16 })),
+                { wch: 16 }, // Total
+                { wch: 22 }, // Metode
+                { wch: 40 }, // Alamat
+                { wch: 24 }, // Status
+                { wch: 24 }  // Catatan
+            ];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Rekap Pesanan MUK');
+
+            // Sheet 2: Ringkasan Total per Item MUK
+            const summaryData = [
+                ['No', 'Nama Item MUK / Dokumen', 'Total Kebutuhan (Eksemplar)'],
+                ...MUK_ITEMS_MASTER.map((m, idx) => [idx + 1, m.name, totalPerItem[idx]]),
+                ['', 'GRAND TOTAL KESELURUHAN', grandTotalEks]
+            ];
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+            wsSummary['!cols'] = [{ wch: 6 }, { wch: 32 }, { wch: 26 }];
+            XLSX.utils.book_append_sheet(wb, wsSummary, 'Ringkasan Stok');
+
+            XLSX.writeFile(wb, `Rekap_Stok_MUK_LSP_${dateStr}.xlsx`);
+            showToast('File Excel (.xlsx) berhasil diunduh!', 'success');
+        }
+
+        // Export Rekap ke File PDF Laporan Resmi (.pdf)
+        function exportToPDF() {
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                showToast('Pustaka PDF gagal dimuat. Periksa koneksi internet Anda.', 'error');
+                return;
+            }
+            if (orderRecords.length === 0) {
+                showToast('Belum ada data untuk di-export ke PDF.', 'error');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const dateStr = new Date().toISOString().split('T')[0];
+
+            // Header Judul Laporan
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.setTextColor(15, 23, 42);
+            doc.text('REKAPITULASI PERMOHONAN STOK MUK & DOKUMEN LSP', 14, 15);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Dicetak pada: ${dateStr}  |  Total Permohonan: ${orderRecords.length} Pesanan`, 14, 21);
+
+            // Tabel Utama Daftar Pesanan
+            const tableHead = [[
+                'No',
+                'Tanggal',
+                'Nama Asesor / Pemohon',
+                'No. HP / WA',
+                'Rincian Stok MUK & Dokumen',
+                'Total',
+                'Pengambilan / Alamat',
+                'Status Logistik'
+            ]];
+
+            let grandTotalEks = 0;
+            const tableBody = orderRecords.map((rec, idx) => {
+                let totalEks = 0;
+                const itemLines = [];
+                MUK_ITEMS_MASTER.forEach(m => {
+                    const q = parseInt(rec.items?.[m.id], 10) || 0;
+                    if (q > 0) {
+                        totalEks += q;
+                        itemLines.push(`• ${m.name}: ${q} eks`);
+                    }
+                });
+                grandTotalEks += totalEks;
+
+                const metodeInfo = rec.metode === 'Mohon Kirim ke Alamat' && rec.alamat
+                    ? `${rec.metode}\n(${rec.alamat.replace(/\r?\n/g, ', ')})`
+                    : rec.metode;
+
+                return [
+                    idx + 1,
+                    rec.tanggal,
+                    rec.nama,
+                    rec.hp || '-',
+                    itemLines.join('\n'),
+                    `${totalEks} eks`,
+                    metodeInfo,
+                    rec.status
+                ];
+            });
+
+            doc.autoTable({
+                startY: 26,
+                head: tableHead,
+                body: tableBody,
+                theme: 'grid',
+                styles: {
+                    font: 'helvetica',
+                    fontSize: 8,
+                    cellPadding: 2.5,
+                    valign: 'top',
+                    textColor: [30, 41, 59]
+                },
+                headStyles: {
+                    fillColor: [5, 150, 105],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 10 },
+                    1: { cellWidth: 22 },
+                    2: { cellWidth: 36, fontStyle: 'bold' },
+                    3: { cellWidth: 26 },
+                    4: { cellWidth: 62 },
+                    5: { halign: 'center', cellWidth: 18, fontStyle: 'bold' },
+                    6: { cellWidth: 62 },
+                    7: { cellWidth: 33 }
+                }
+            });
+
+            // Tabel Ringkasan Akumulasi per Jenis MUK di bawah tabel utama
+            const finalY = doc.lastAutoTable.finalY + 8;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(15, 23, 42);
+            doc.text('Ringkasan Total Kebutuhan per Item MUK:', 14, finalY);
+
+            const summaryBody = MUK_ITEMS_MASTER.map((m, idx) => {
+                const sum = orderRecords.reduce((acc, rec) => acc + (parseInt(rec.items?.[m.id], 10) || 0), 0);
+                return [idx + 1, m.name, `${sum} eksemplar`];
+            });
+            summaryBody.push(['', 'GRAND TOTAL KESELURUHAN', `${grandTotalEks} eksemplar`]);
+
+            doc.autoTable({
+                startY: finalY + 3,
+                head: [['No', 'Nama Item MUK / Dokumen', 'Total Kebutuhan']],
+                body: summaryBody,
+                theme: 'striped',
+                tableWidth: 140,
+                styles: { fontSize: 8, cellPadding: 2 },
+                headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255] },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 12 },
+                    1: { cellWidth: 88 },
+                    2: { halign: 'right', cellWidth: 40, fontStyle: 'bold' }
+                }
+            });
+
+            doc.save(`Rekap_Stok_MUK_LSP_${dateStr}.pdf`);
+            showToast('File laporan PDF (.pdf) berhasil diunduh!', 'success');
+        }
+
+        // Notifikasi Toast
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-slate-900 text-white border-slate-700',
+                error: 'bg-red-600 text-white border-red-700',
+                info: 'bg-primary-700 text-white border-primary-800'
+            };
+
+            const icons = {
+                success: 'fa-circle-check text-emerald-400',
+                error: 'fa-circle-exclamation text-white',
+                info: 'fa-circle-info text-emerald-200'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-xs sm:text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.success}`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.success}"></i><span>${message}</span>`;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
