@@ -22,12 +22,12 @@
                     },
                     colors: {
                         primary: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            900: '#064e3b',
+                            50: '#f3f2ff',
+                            100: '#e7e5ff',
+                            500: '#7267ef',
+                            600: '#5e52e8',
+                            700: '#4c40d6',
+                            900: '#27207a',
                         },
                         whatsapp: {
                             500: '#25D366',
@@ -42,76 +42,81 @@
         }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-[#f4f7fa] text-slate-800 antialiased min-h-screen flex flex-col">
 
     <!-- Notifikasi Toast (Pengganti alert()) -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- Header / Navbar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <header class="bg-white border-b border-slate-200/80 sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-md shadow-primary-500/20">
+                <div class="w-10 h-10 rounded-xl bg-primary-500 text-white flex items-center justify-center shadow-md shadow-primary-500/25 shrink-0">
                     <i class="fa-solid fa-clipboard-check text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-slate-900 text-sm sm:text-lg leading-tight">Form Permohonan Stok MUK</h1>
+                    <h1 class="font-bold text-slate-900 text-sm sm:text-base leading-tight">Form Permohonan Stok MUK</h1>
                     <p class="text-[11px] sm:text-xs text-slate-500">Materi Uji Kompetensi &bull; Khusus Asesor Kompetensi</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button type="button" onclick="resetForm()" class="text-xs sm:text-sm text-slate-600 hover:text-red-600 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1.5">
+                <span class="hidden sm:inline-flex items-center px-3 py-1 rounded-lg bg-primary-50 text-primary-600 font-semibold text-xs border border-primary-100">
+                    Portal Asesor LSP
+                </span>
+                <button type="button" onclick="resetForm()" class="text-xs sm:text-sm text-slate-600 hover:text-red-600 font-medium px-3 py-2 rounded-xl hover:bg-red-50 transition-colors flex items-center gap-1.5">
                     <i class="fa-solid fa-rotate-right"></i>
                     <span>Reset Form</span>
                 </button>
             </div>
         </div>
+        <!-- Breadcrumb Sub-bar (Selaras dengan Dasbor Admin) -->
+        <div class="bg-white border-t border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-slate-800">Logistik MUK</span>
+                    <span class="text-slate-300">|</span>
+                    <span class="text-slate-400">Asesor</span>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-300"></i>
+                    <span class="text-primary-600 font-medium">Permohonan Stok MUK</span>
+                </div>
+                <span class="text-[11px] text-slate-500 hidden sm:inline">Admin WA: <strong class="text-slate-700">+62 813-8832-6646</strong></span>
+            </div>
+        </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
             <!-- Kolom Kiri: Form Input (7 Kolom di Desktop) -->
-            <div class="lg:col-span-7 space-y-6">
+            <div class="lg:col-span-7 space-y-5">
                 
                 <!-- Card 1: Konfigurasi Nomor WhatsApp Tujuan -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                <section class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
                                 <i class="fa-brands fa-whatsapp text-lg"></i>
                             </span>
                             <div>
-                                <h2 class="font-semibold text-slate-900 text-sm sm:text-base">Tujuan Admin / Logistik MUK LSP</h2>
-                                <p class="text-xs text-slate-500">Nomor resmi Admin LSP terkunci otomatis</p>
+                                <h2 class="font-bold text-slate-900 text-sm">Tujuan Admin / Logistik MUK LSP</h2>
+                                <p class="text-xs text-slate-500">Nomor resmi Admin LSP terkunci otomatis: <strong class="text-slate-700">+62 813-8832-6646</strong></p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span id="wa-saved-badge" class="text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
-                                <i class="fa-solid fa-lock mr-1"></i>Terkunci
-                            </span>
-                        </div>
+                        <span id="wa-saved-badge" class="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg shrink-0">
+                            <i class="fa-solid fa-lock mr-1"></i>Terkunci
+                        </span>
                     </div>
-
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <div class="relative flex-grow">
-                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                <span class="text-slate-400 font-medium text-sm">+</span>
-                            </div>
-                            <input type="tel" id="wa-destination" value="6281388326646" disabled readonly
-                                class="w-full pl-7 pr-4 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 cursor-not-allowed select-none outline-none">
-                        </div>
-                    </div>
+                    <input type="hidden" id="wa-destination" value="6281388326646">
                     <p id="error-wa" class="hidden text-xs text-red-600 mt-1.5 font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i>Nomor WhatsApp tujuan wajib diisi dengan format 628xxx.</p>
                 </section>
 
                 <!-- Card 2: Informasi Asesor / Pemohon -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
-                    <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-slate-100">
-                        <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">1</span>
+                <section class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6">
+                    <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                        <span class="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xs">1</span>
                         <div>
-                            <h2 class="font-semibold text-slate-900 text-base">Data Asesor / Pemohon</h2>
+                            <h2 class="font-bold text-slate-900 text-sm sm:text-base">Data Asesor / Pemohon</h2>
                             <p class="text-xs text-slate-500">Isi nama asesor pemohon permohonan stok MUK & dokumen</p>
                         </div>
                     </div>
@@ -141,27 +146,52 @@
                 </section>
 
                 <!-- Card 3: Daftar Permohonan Stok MUK & Dokumen -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+                <section class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6">
                     <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">2</span>
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xs">2</span>
                             <div>
-                                <h2 class="font-semibold text-slate-900 text-base">Daftar Permohonan Stok MUK <span class="text-red-500">*</span></h2>
+                                <h2 class="font-bold text-slate-900 text-sm sm:text-base">Daftar Permohonan Stok MUK <span class="text-red-500">*</span></h2>
                                 <p class="text-xs text-slate-500">Tentukan jumlah eksemplar/paket untuk setiap item yang dibutuhkan</p>
                             </div>
                         </div>
-                        <button type="button" onclick="resetQuantities()" class="text-xs font-medium text-slate-600 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
+                        <button type="button" onclick="resetQuantities()" class="text-xs font-semibold text-slate-600 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-3 py-1.5 rounded-xl transition-colors">
                             <i class="fa-solid fa-eraser mr-1"></i>Nol-kan Jumlah
                         </button>
                     </div>
 
                     <!-- Container Daftar Item MUK & Dokumen -->
+                    <div class="flex flex-wrap items-center gap-1.5 mb-3">
+                        <button type="button" id="sector-tab-ALL" onclick="setSectorFilter('ALL')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary-600 text-white transition-colors">Semua</button>
+                        <button type="button" id="sector-tab-DOMESTIK" onclick="setSectorFilter('DOMESTIK')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Pekerja Domestik</button>
+                        <button type="button" id="sector-tab-CUSTOM" onclick="setSectorFilter('CUSTOM')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Sektor Lain (Custom)</button>
+                    </div>
                     <div id="muk-items-container" class="space-y-3">
                         <!-- Baris item akan di-render melalui JavaScript -->
                     </div>
 
+                    <!-- Bagian Input Custom untuk Sektor Lainnya -->
+                    <div id="custom-muk-section" class="mt-4 pt-4 border-t border-slate-200/80">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                            <div>
+                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-sliders text-emerald-600"></i>
+                                    <span>Permohonan Custom MUK (Sektor Lain)</span>
+                                </h3>
+                                <p class="text-[11px] text-slate-500">Isi nama MUK/dokumen sektor lain sesuai kebutuhan (contoh: Sektor Kelapa Sawit)</p>
+                            </div>
+                            <button type="button" onclick="addCustomMukRow()" class="text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Tambah Item Sektor Lain</span>
+                            </button>
+                        </div>
+                        <div id="custom-muk-container" class="space-y-2.5">
+                            <!-- Baris item custom di-render melalui JavaScript -->
+                        </div>
+                    </div>
+
                     <p id="error-muk" class="hidden text-xs text-red-600 mt-3 font-medium">
-                        <i class="fa-solid fa-circle-exclamation mr-1"></i>Pilih minimal 1 item MUK/dokumen dengan jumlah lebih dari 0.
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i>Pilih minimal 1 item MUK/dokumen (atau isi item custom) dengan jumlah lebih dari 0.
                     </p>
 
                     <!-- Ringkasan Total -->
@@ -172,11 +202,11 @@
                 </section>
 
                 <!-- Card 4: Metode Pengambilan / Pengiriman -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
-                    <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
-                        <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">3</span>
+                <section class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6">
+                    <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                        <span class="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xs">3</span>
                         <div>
-                            <h2 class="font-semibold text-slate-900 text-base">Metode Pengambilan / Pengiriman <span class="text-red-500">*</span></h2>
+                            <h2 class="font-bold text-slate-900 text-sm sm:text-base">Metode Pengambilan / Pengiriman <span class="text-red-500">*</span></h2>
                             <p class="text-xs text-slate-500">Pilih apakah dokumen diambil ke LSP atau dikirim ke alamat</p>
                         </div>
                     </div>
@@ -229,11 +259,11 @@
                 </section>
 
                 <!-- Card 5: Catatan Tambahan -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
-                    <div class="flex items-center gap-2.5 mb-3">
-                        <span class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-sm">4</span>
+                <section class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xs">4</span>
                         <div>
-                            <h2 class="font-semibold text-slate-900 text-base">Catatan Tambahan <span class="text-slate-400 font-normal text-xs">(Opsional)</span></h2>
+                            <h2 class="font-bold text-slate-900 text-sm sm:text-base">Catatan Tambahan <span class="text-slate-400 font-normal text-xs">(Opsional)</span></h2>
                             <p class="text-xs text-slate-500">Keterangan pengiriman, batas waktu pengambilan, atau kebutuhan khusus</p>
                         </div>
                     </div>
@@ -245,20 +275,20 @@
             </div>
 
             <!-- Kolom Kanan: Live Preview & Tombol Kirim (5 Kolom di Desktop, Sticky) -->
-            <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-5">
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
+            <div class="lg:col-span-5 lg:sticky lg:top-28 space-y-5">
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
                     <!-- Header Preview -->
-                    <div class="bg-whatsapp-700 text-white px-5 py-3.5 flex items-center justify-between">
+                    <div class="bg-gradient-to-r from-[#1c232f] to-[#262f40] text-white px-5 py-3.5 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                            <div class="w-9 h-9 rounded-xl bg-whatsapp-500 text-white flex items-center justify-center shadow-xs">
                                 <i class="fa-brands fa-whatsapp text-xl"></i>
                             </div>
                             <div>
                                 <h3 class="font-semibold text-sm leading-tight">Pratinjau Pesan WhatsApp</h3>
-                                <p class="text-[11px] text-emerald-100" id="preview-recipient-label">Tujuan: Belum diatur</p>
+                                <p class="text-[11px] text-slate-300" id="preview-recipient-label">Tujuan: +62 813-8832-6646</p>
                             </div>
                         </div>
-                        <span class="text-[11px] bg-black/20 px-2.5 py-1 rounded-full font-medium">Live Preview</span>
+                        <span class="text-[11px] bg-primary-500/25 text-primary-100 border border-primary-400/30 px-2.5 py-1 rounded-lg font-medium">Live Preview</span>
                     </div>
 
                     <!-- Area Simulasi Chat WhatsApp -->
@@ -290,10 +320,10 @@
                 </div>
 
                 <!-- Info Box Singkat -->
-                <div class="bg-emerald-50/80 border border-emerald-100 rounded-xl p-4 flex items-start gap-3">
+                <div class="bg-primary-50/70 border border-primary-100 rounded-2xl p-4 flex items-start gap-3">
                     <i class="fa-solid fa-circle-info text-primary-600 mt-0.5"></i>
                     <p class="text-xs text-slate-600 leading-relaxed">
-                        <strong>Panduan Asesor:</strong> Atur jumlah set MUK pada skema yang akan diujikan, lalu tekan tombol <strong>Kirim Permohonan ke WhatsApp</strong> untuk meneruskan pesanan otomatis ke bagian logistik LSP.
+                        <strong>Panduan Asesor:</strong> Atur jumlah set MUK pada jabatan kerja yang akan diujikan, lalu tekan tombol <strong>Kirim Permohonan ke WhatsApp</strong> untuk meneruskan pesanan otomatis ke bagian logistik LSP.
                     </p>
                 </div>
             </div>
@@ -315,20 +345,27 @@
         // Nomor WhatsApp resmi Admin / Logistik MUK LSP yang dikunci permanen
         const LOCKED_ADMIN_WA = '6281388326646';
 
-        // Daftar tetap 8 item MUK & Dokumen sesuai kebutuhan Asesor Kompetensi
+        // Web App URL Google Apps Script yang terhubung otomatis ke Google Sheets LSP
+        const GOOGLE_SHEET_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwa08GhWGzEpq2WJ2zX0DRvhzx6zRxd3EfCoHml_KVXAQtQeiNdyTboddb8ab-lohP4/exec';
+
+        // Daftar item MUK & Dokumen standar (Pekerja Domestik & Dokumen Umum)
         const DEFAULT_MUK_LIST = [
-            { id: 'housekeeper', name: 'Skema Housekeeper', qty: 0 },
-            { id: 'caretaker', name: 'Skema Caretaker', qty: 0 },
-            { id: 'babysitter', name: 'Skema Babysitter', qty: 0 },
-            { id: 'sprint-housekeeper', name: 'Sprint Housekeeper', qty: 0 },
-            { id: 'sprint-caretaker', name: 'Sprint Caretaker', qty: 0 },
-            { id: 'sprint-baby', name: 'Sprint Baby', qty: 0 },
-            { id: 'verifikasi-tuk', name: 'Verifikasi TUK', qty: 0 },
-            { id: 'tanda-terima-sertifikat', name: 'Form Tanda Terima Sertifikat', qty: 0 }
+            { id: 'housekeeper', name: 'MUK Housekeeper', sector: 'DOMESTIK', sectorLabel: 'Domestik', qty: 0 },
+            { id: 'caretaker', name: 'MUK Caretaker', sector: 'DOMESTIK', sectorLabel: 'Domestik', qty: 0 },
+            { id: 'babysitter', name: 'MUK Babysitter', sector: 'DOMESTIK', sectorLabel: 'Domestik', qty: 0 },
+            { id: 'sprint-housekeeper', name: 'Sprint Housekeeper', sector: 'DOMESTIK', sectorLabel: 'Domestik', qty: 0 },
+            { id: 'sprint-caretaker', name: 'Sprint Caretaker', sector: 'DOMESTIK', sectorLabel: 'Domestik', qty: 0 },
+            { id: 'sprint-baby', name: 'Sprint Baby', sector: 'DOMESTIK', sectorLabel: 'Domestik', qty: 0 },
+            { id: 'verifikasi-tuk', name: 'Verifikasi TUK', sector: 'UMUM', sectorLabel: 'Dokumen Umum', qty: 0 },
+            { id: 'tanda-terima-sertifikat', name: 'Form Tanda Terima Sertifikat', sector: 'UMUM', sectorLabel: 'Dokumen Umum', qty: 0 }
         ];
 
-        // State daftar item MUK
+        // State daftar item MUK standar, item custom (Sektor Lain), & filter sektor aktif
         let mukItems = DEFAULT_MUK_LIST.map(item => ({ ...item }));
+        let customMukItems = [
+            { id: 'custom-1', sector: 'Sektor Lain', name: '', qty: 0 }
+        ];
+        let activeSectorFilter = 'ALL';
 
         // Inisialisasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', () => {
@@ -337,8 +374,9 @@
             // Set nomor WhatsApp Admin resmi yang terkunci
             document.getElementById('wa-destination').value = LOCKED_ADMIN_WA;
 
-            // Render daftar item MUK
+            // Render daftar item MUK standar & custom
             renderMukRows();
+            renderCustomMukRows();
 
             // Update jam di pratinjau
             updatePreviewClock();
@@ -362,7 +400,7 @@
             const icons = {
                 success: 'fa-circle-check text-emerald-400',
                 error: 'fa-circle-exclamation text-white',
-                info: 'fa-circle-info text-emerald-200'
+                info: 'fa-circle-info text-indigo-200'
             };
 
             toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.success}`;
@@ -383,13 +421,43 @@
             }, 3200);
         }
 
+        // Mengatur filter tab sektor MUK
+        function setSectorFilter(sector) {
+            activeSectorFilter = sector;
+            ['ALL', 'DOMESTIK', 'CUSTOM'].forEach(key => {
+                const btn = document.getElementById(`sector-tab-${key}`);
+                if (!btn) return;
+                if (key === sector) {
+                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary-600 text-white transition-colors';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors';
+                }
+            });
+            const standardContainer = document.getElementById('muk-items-container');
+            if (sector === 'CUSTOM') {
+                standardContainer.classList.add('hidden');
+            } else {
+                standardContainer.classList.remove('hidden');
+                renderMukRows();
+            }
+        }
+
         // Render ulang semua baris item MUK dengan tombol +/- dan input angka langsung
         function renderMukRows() {
             const container = document.getElementById('muk-items-container');
             container.innerHTML = '';
 
-            mukItems.forEach((item, index) => {
+            const visibleItems = mukItems.filter(item => {
+                if (activeSectorFilter === 'ALL') return true;
+                if (activeSectorFilter === 'CUSTOM') return false;
+                return item.sector === activeSectorFilter || item.sector === 'UMUM';
+            });
+
+            visibleItems.forEach((item, index) => {
                 const isSelected = item.qty > 0;
+                const sectorBadgeClass = item.sector === 'DOMESTIK'
+                    ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                    : 'bg-slate-100 text-slate-600 border-slate-200';
                 const row = document.createElement('div');
                 row.id = `row-${item.id}`;
                 row.className = `flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border transition-all ${
@@ -399,13 +467,18 @@
                 }`;
 
                 row.innerHTML = `
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
                         <span class="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center shrink-0 ${
                             isSelected ? 'bg-primary-600 text-white' : 'bg-slate-200 text-slate-600'
                         }">${index + 1}</span>
-                        <span class="font-medium text-sm ${isSelected ? 'text-primary-900 font-semibold' : 'text-slate-800'}">
-                            ${escapeHtml(item.name)}
-                        </span>
+                        <div class="min-w-0">
+                            <span class="font-medium text-sm block truncate ${isSelected ? 'text-primary-900 font-semibold' : 'text-slate-800'}">
+                                ${escapeHtml(item.name)}
+                            </span>
+                            <span class="inline-block mt-0.5 px-2 py-0.2 rounded text-[10px] font-semibold border ${sectorBadgeClass}">
+                                ${escapeHtml(item.sectorLabel)}
+                            </span>
+                        </div>
                     </div>
                     <div class="flex items-center justify-end gap-2 shrink-0">
                         <button type="button" onclick="adjustMukQty('${item.id}', -1)" aria-label="Kurangi ${escapeHtml(item.name)}"
@@ -429,31 +502,147 @@
             updatePreview();
         }
 
-        // Tambah atau kurangi jumlah item MUK lewat tombol +/-
-        function adjustMukQty(id, delta) {
-            const target = mukItems.find(item => item.id === id);
-            if (!target) return;
+        // Render baris input custom untuk Sektor Lain
+        function renderCustomMukRows() {
+            const container = document.getElementById('custom-muk-container');
+            if (!container) return;
+            container.innerHTML = '';
 
-            target.qty = Math.max(0, (target.qty || 0) + delta);
+            customMukItems.forEach((item, idx) => {
+                const isSelected = item.name.trim() !== '' && item.qty > 0;
+                const row = document.createElement('div');
+                row.id = `custom-row-${item.id}`;
+                row.className = `p-3 rounded-xl border transition-all space-y-2.5 ${
+                    isSelected ? 'bg-emerald-50/50 border-emerald-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200'
+                }`;
+
+                row.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <span class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-emerald-100/80 text-emerald-800 border border-emerald-200 text-[11px] font-bold shrink-0">
+                            Sektor Lain #${idx + 1}
+                        </span>
+                        <input type="text" value="${escapeHtml(item.name)}"
+                            placeholder="Contoh: MUK Kelapa Sawit / Sprint Pemanen Sawit..."
+                            oninput="updateCustomMukField('${item.id}', 'name', this.value)"
+                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                    <div class="flex items-center justify-between gap-2 pt-0.5">
+                        <span class="text-[11px] text-slate-500">Jumlah eksemplar yang dibutuhkan</span>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="adjustCustomMukQty('${item.id}', -1)"
+                                class="w-9 h-9 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold flex items-center justify-center">
+                                <i class="fa-solid fa-minus text-xs"></i>
+                            </button>
+                            <input type="number" min="0" max="9999" value="${item.qty}"
+                                oninput="updateCustomMukField('${item.id}', 'qty', this.value)"
+                                class="w-14 h-9 text-center bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-primary-500 outline-none">
+                            <button type="button" onclick="adjustCustomMukQty('${item.id}', 1)"
+                                class="w-9 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center justify-center">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
+                            ${customMukItems.length > 1 ? `
+                            <button type="button" onclick="removeCustomMukRow('${item.id}')" title="Hapus baris custom"
+                                class="w-9 h-9 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 flex items-center justify-center ml-1">
+                                <i class="fa-regular fa-trash-can text-xs"></i>
+                            </button>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addCustomMukRow() {
+            customMukItems.push({
+                id: 'custom-' + Date.now() + '-' + Math.floor(Math.random() * 100),
+                sector: 'Sektor Lain',
+                name: '',
+                qty: 0
+            });
+            renderCustomMukRows();
+        }
+
+        function removeCustomMukRow(id) {
+            customMukItems = customMukItems.filter(c => c.id !== id);
+            renderCustomMukRows();
+            updateSummaryCounts();
+            updatePreview();
+        }
+
+        function adjustCustomMukQty(id, delta) {
+            const item = customMukItems.find(c => c.id === id);
+            if (!item) return;
+            item.qty = Math.max(0, (parseInt(item.qty, 10) || 0) + delta);
+            if (item.qty > 0 && item.name.trim()) {
+                document.getElementById('error-muk').classList.add('hidden');
+            }
+            renderCustomMukRows();
+            updateSummaryCounts();
+            updatePreview();
+        }
+
+        function updateCustomMukField(id, field, value) {
+            const item = customMukItems.find(c => c.id === id);
+            if (!item) return;
+            if (field === 'qty') {
+                const parsed = parseInt(value, 10);
+                item.qty = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+            } else {
+                item[field] = value;
+            }
+            if (item.qty > 0 && item.name.trim()) {
+                document.getElementById('error-muk').classList.add('hidden');
+            }
+            const row = document.getElementById(`custom-row-${id}`);
+            if (row) {
+                const isSelected = item.name.trim() !== '' && item.qty > 0;
+                row.className = `p-3 rounded-xl border transition-all space-y-2.5 ${
+                    isSelected ? 'bg-emerald-50/50 border-emerald-300 shadow-2xs' : 'bg-slate-50/80 border-slate-200'
+                }`;
+            }
+            updateSummaryCounts();
+            updatePreview();
+        }
+
+        // Menambah atau mengurangi jumlah item MUK
+        function adjustMukQty(id, delta) {
+            const item = mukItems.find(i => i.id === id);
+            if (!item) return;
+            item.qty = Math.max(0, (parseInt(item.qty, 10) || 0) + delta);
+            if (item.qty > 0) {
+                document.getElementById('error-muk').classList.add('hidden');
+            }
             renderMukRows();
         }
 
-        // Atur jumlah item MUK dari input angka langsung tanpa menghilangkan fokus ketik
-        function setMukQty(id, value) {
-            const target = mukItems.find(item => item.id === id);
-            if (!target) return;
-
-            const parsed = parseInt(value, 10);
-            target.qty = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+        // Mengatur jumlah item MUK dari ketikan manual
+        function setMukQty(id, val) {
+            const item = mukItems.find(i => i.id === id);
+            if (!item) return;
+            const parsed = parseInt(val, 10);
+            item.qty = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+            if (item.qty > 0) {
+                document.getElementById('error-muk').classList.add('hidden');
+            }
 
             const row = document.getElementById(`row-${id}`);
             if (row) {
-                const isSelected = target.qty > 0;
+                const isSelected = item.qty > 0;
                 row.className = `flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border transition-all ${
                     isSelected 
                         ? 'bg-primary-50/50 border-primary-300 shadow-xs' 
                         : 'bg-slate-50/70 border-slate-200 hover:border-slate-300'
                 }`;
+                const badge = row.querySelector('span:first-child');
+                if (badge) {
+                    badge.className = `w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center shrink-0 ${
+                        isSelected ? 'bg-primary-600 text-white' : 'bg-slate-200 text-slate-600'
+                    }`;
+                }
+                const titleEl = row.querySelector('div > span:first-child');
+                if (titleEl) {
+                    titleEl.className = `font-medium text-sm block truncate ${isSelected ? 'text-primary-900 font-semibold' : 'text-slate-800'}`;
+                }
             }
 
             updateSummaryCounts();
@@ -463,16 +652,20 @@
         // Reset semua jumlah item menjadi 0
         function resetQuantities() {
             mukItems.forEach(item => { item.qty = 0; });
+            customMukItems = [{ id: 'custom-1', sector: 'Sektor Lain', name: '', qty: 0 }];
             renderMukRows();
+            renderCustomMukRows();
             showToast('Semua jumlah item telah di-nolkan.', 'info');
         }
 
-        // Hitung total jenis dokumen & total eksemplar
+        // Hitung total jenis dokumen & total eksemplar (termasuk custom)
         function updateSummaryCounts() {
-            const selectedItems = mukItems.filter(i => i.qty > 0);
-            const totalQty = selectedItems.reduce((sum, item) => sum + item.qty, 0);
+            const selectedStandard = mukItems.filter(i => i.qty > 0);
+            const selectedCustom = customMukItems.filter(c => c.name.trim() !== '' && c.qty > 0);
+            const totalQty = selectedStandard.reduce((sum, item) => sum + item.qty, 0) +
+                             selectedCustom.reduce((sum, item) => sum + item.qty, 0);
 
-            document.getElementById('total-jenis').textContent = selectedItems.length;
+            document.getElementById('total-jenis').textContent = selectedStandard.length + selectedCustom.length;
             document.getElementById('total-eksemplar').textContent = totalQty;
         }
 
@@ -504,7 +697,7 @@ Tlp/Hp   : 0888 0873 6052`;
             showToast('Contoh format penerima & alamat berhasil dimasukkan.', 'info');
         }
 
-        // Susun teks pesan WhatsApp terformat rapi (tanpa Tanggal UJK & Nama TUK)
+        // Susun teks pesan WhatsApp terformat rapi
         function buildWhatsAppMessage() {
             const nama = document.getElementById('nama-pemohon').value.trim() || '[Nama Asesor / Pemohon]';
             const hp = document.getElementById('hp-pemohon').value.trim();
@@ -513,14 +706,23 @@ Tlp/Hp   : 0888 0873 6052`;
             const catatan = document.getElementById('catatan-tambahan').value.trim();
 
             const selectedItems = mukItems.filter(i => i.qty > 0);
+            const selectedCustom = customMukItems.filter(c => c.name.trim() !== '' && c.qty > 0);
+            const totalJenis = selectedItems.length + selectedCustom.length;
             let daftarMukText = '';
             let totalEks = 0;
+            let counter = 0;
 
-            if (selectedItems.length === 0) {
+            if (totalJenis === 0) {
                 daftarMukText = '   _(Belum ada item MUK / dokumen yang dipilih)_';
             } else {
-                selectedItems.forEach((item, idx) => {
-                    daftarMukText += `${idx + 1}. ${item.name} — *${item.qty} eks*\n`;
+                selectedItems.forEach(item => {
+                    counter++;
+                    daftarMukText += `${counter}. ${item.name} — *${item.qty} eks*\n`;
+                    totalEks += item.qty;
+                });
+                selectedCustom.forEach(item => {
+                    counter++;
+                    daftarMukText += `${counter}. [${item.sector}] ${item.name.trim()} — *${item.qty} eks*\n`;
                     totalEks += item.qty;
                 });
                 daftarMukText = daftarMukText.trimEnd();
@@ -537,7 +739,7 @@ Tlp/Hp   : 0888 0873 6052`;
             }
             msg += `\n*DAFTAR PERMOHONAN STOK MUK*\n`;
             msg += `${daftarMukText}\n`;
-            msg += `• *Total:* ${selectedItems.length} jenis (${totalEks} eksemplar)\n`;
+            msg += `• *Total:* ${totalJenis} jenis (${totalEks} eksemplar)\n`;
 
             msg += `\n*PENGAMBILAN / PENGIRIMAN*\n`;
             msg += `• *Metode:* ${metode}\n`;
@@ -581,53 +783,101 @@ Tlp/Hp   : 0888 0873 6052`;
             const namaVal = document.getElementById('nama-pemohon').value.trim();
             const metodeVal = document.querySelector('input[name="metode-pengambilan"]:checked')?.value;
             const alamatVal = document.getElementById('alamat-pengiriman').value.trim();
-            const selectedItems = mukItems.filter(i => i.qty > 0);
-
-            // Reset pesan error
-            ['error-wa', 'error-nama', 'error-muk', 'error-alamat'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
 
             if (!namaVal) {
                 document.getElementById('error-nama').classList.remove('hidden');
                 isValid = false;
-                firstErrorEl = firstErrorEl || document.getElementById('nama-pemohon');
+                if (!firstErrorEl) firstErrorEl = document.getElementById('nama-pemohon');
+            } else {
+                document.getElementById('error-nama').classList.add('hidden');
             }
 
-            if (selectedItems.length === 0) {
+            const selectedItems = mukItems.filter(i => i.qty > 0);
+            const selectedCustom = customMukItems.filter(c => c.name.trim() !== '' && c.qty > 0);
+            if (selectedItems.length === 0 && selectedCustom.length === 0) {
                 document.getElementById('error-muk').classList.remove('hidden');
                 isValid = false;
-                firstErrorEl = firstErrorEl || document.getElementById('muk-items-container');
+                if (!firstErrorEl) firstErrorEl = document.getElementById('muk-items-container');
+            } else {
+                document.getElementById('error-muk').classList.add('hidden');
             }
 
             if (metodeVal === 'Mohon Kirim ke Alamat' && !alamatVal) {
                 document.getElementById('error-alamat').classList.remove('hidden');
                 isValid = false;
-                firstErrorEl = firstErrorEl || document.getElementById('alamat-pengiriman');
+                if (!firstErrorEl) firstErrorEl = document.getElementById('alamat-pengiriman');
+            } else {
+                document.getElementById('error-alamat').classList.add('hidden');
             }
 
-            if (!isValid && firstErrorEl) {
-                firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                if (firstErrorEl.tagName === 'INPUT' || firstErrorEl.tagName === 'TEXTAREA') firstErrorEl.focus();
-                showToast('Mohon lengkapi data wajib terlebih dahulu.', 'error');
+            if (!isValid) {
+                showToast('Mohon lengkapi bagian yang ditandai merah terlebih dahulu.', 'error');
+                if (firstErrorEl) {
+                    firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (typeof firstErrorEl.focus === 'function') firstErrorEl.focus();
+                }
             }
 
             return isValid;
         }
 
-        // Kirim pesan ke WhatsApp
-        function sendToWhatsApp() {
+        // Kirim pesan ke WhatsApp sekaligus simpan otomatis ke Google Sheets (jika URL sudah diisi)
+        async function sendToWhatsApp() {
             if (!validateForm()) return;
 
             const message = buildWhatsAppMessage();
             const encodedMessage = encodeURIComponent(message);
             const waUrl = `https://wa.me/${LOCKED_ADMIN_WA}?text=${encodedMessage}`;
 
-            showToast('Membuka WhatsApp Admin LSP...', 'success');
+            // Susun tanggal lokal (YYYY-MM-DD) agar tidak tergeser zona waktu UTC
+            const now = new Date();
+            const localDateISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+            // Susun objek rekap untuk disimpan otomatis ke Google Sheets
+            if (GOOGLE_SHEET_WEBAPP_URL && GOOGLE_SHEET_WEBAPP_URL.startsWith('http')) {
+                const itemsMap = {};
+                mukItems.forEach(item => {
+                    if (item.qty > 0) itemsMap[item.id] = item.qty;
+                });
+                const cleanCustom = customMukItems
+                    .filter(c => c.name.trim() !== '' && c.qty > 0)
+                    .map(c => ({ sector: c.sector, name: c.name.trim(), qty: c.qty }));
+
+                const payload = {
+                    action: 'upsert',
+                    record: {
+                        id: 'ORD-' + Date.now(),
+                        tanggal: localDateISO,
+                        nama: document.getElementById('nama-pemohon').value.trim(),
+                        hp: document.getElementById('hp-pemohon').value.trim(),
+                        items: itemsMap,
+                        customItems: cleanCustom,
+                        metode: document.querySelector('input[name="metode-pengambilan"]:checked')?.value || 'Diambil di Kantor LSP',
+                        alamat: document.getElementById('alamat-pengiriman').value.trim(),
+                        catatan: document.getElementById('catatan-tambahan').value.trim(),
+                        status: 'Menunggu Disiapkan'
+                    }
+                };
+
+                try {
+                    fetch(GOOGLE_SHEET_WEBAPP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload)
+                    });
+                    showToast('Data tercatat ke Google Sheets & membuka WhatsApp...', 'success');
+                } catch (e) {
+                    showToast('Membuka WhatsApp Admin LSP...', 'success');
+                }
+            } else {
+                showToast('Membuka WhatsApp Admin LSP...', 'success');
+            }
+
             window.open(waUrl, '_blank', 'noopener,noreferrer');
         }
 
-        // Salin teks pesan ke clipboard (menggunakan document.execCommand('copy') sesuai aturan lingkungan iframe)
+        // Salin teks pesan ke clipboard
         function copyMessageText() {
             const message = buildWhatsAppMessage();
             const helper = document.getElementById('clipboard-helper');
@@ -651,7 +901,7 @@ Tlp/Hp   : 0888 0873 6052`;
             window.getSelection().removeAllRanges();
         }
 
-        // Reset formulir (tanpa menghapus nomor WA tujuan yang tersimpan)
+        // Reset formulir
         function resetForm() {
             document.getElementById('nama-pemohon').value = '';
             document.getElementById('hp-pemohon').value = '';
@@ -663,12 +913,14 @@ Tlp/Hp   : 0888 0873 6052`;
             toggleAlamatPengiriman();
 
             mukItems = DEFAULT_MUK_LIST.map(item => ({ ...item }));
+            customMukItems = [{ id: 'custom-1', sector: 'Sektor Lain', name: '', qty: 0 }];
 
             ['error-wa', 'error-nama', 'error-muk', 'error-alamat'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
 
-            renderMukRows();
+            setSectorFilter('ALL');
+            renderCustomMukRows();
             showToast('Formulir telah dikosongkan.', 'info');
         }
 
